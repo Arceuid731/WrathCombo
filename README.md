@@ -19,6 +19,8 @@ Install **Wrath Combo Enhanced**. Both editions can stay installed; enable only 
 3. Customize the red damage and green healing highlights and the two action windows.
 4. Use **Preview windows** to arrange them. Turn off **Lock window**, then drag a corner to resize. Each window saves its own position and size.
 
+**Highlight style → Glow** uses the game's soft luminous action frame, tinted with your Damage and Healing colors. Adjust **Glow intensity** and **Pulse highlights**, or choose **Outline** for the plain border. The frame follows each hotbar's size, including cross hotbars. If both channels suggest the same slot, their frames are nested.
+
 Each window can show the action icon, action name, target name and GCD progress. Icons shrink to fit smaller windows; long names are shortened and available in full on hover. Target names are green when already selected and orange when another target is suggested. Click a target name to select it. **Click icon to use action** is optional and off by default. **Click through when locked** passes clicks to the game while locked; unlocked windows remain interactive for arranging the layout.
 
 Use your normal hotbars, Wrath's custom one-button actions, or explicitly enable window clicks. Automatic execution is controlled by Wrath's native **Auto-Rotation** settings and IPC integrations. Teaching mode works with Auto-Rotation off or on.
@@ -28,6 +30,8 @@ Damage and healing recommendations run independently. Automatic mode chooses sin
 If a window stays empty, **Debug → Teaching mode diagnostics** shows the latest evaluation. Changes in the reason for idle guidance are also recorded in the Dalamud log.
 
 Teaching mode currently covers PvE presets marked as full damage/healing rotations. Existing PvP and utility features remain available on hotbars. Item/pomander proxies are not displayed as spell recommendations. It does not add a separate rotation pack or rewrite Wrath's job priorities.
+
+Highlight colors identify the rotation that suggested an action, rather than a fixed spell category. Shared support actions such as Astrologian's Astral Draw can appear in either channel. Damage guidance needs an enemy target; healing guidance is evaluated when healing or cleansing is needed.
 
 ## Configuration sharing
 

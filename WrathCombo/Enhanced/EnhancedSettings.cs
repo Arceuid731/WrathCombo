@@ -15,6 +15,9 @@ internal sealed class EnhancedSettings
     public bool HideWhenIdle = true;
     public bool Preview;
     public bool UseWrathTargeting;
+    // 0: native glow, 1: simple outline.
+    public int HighlightStyle;
+    public float GlowIntensity = 1;
     public float BorderWidth = 3;
     public bool Pulse = true;
     public ChannelSettings Damage = new() { Color = new(1, 0.15f, 0.12f, 1) };
@@ -28,6 +31,8 @@ internal sealed class EnhancedSettings
             Current = JsonConvert.DeserializeObject<EnhancedSettings>(File.ReadAllText(FilePath))
                 ?? throw new InvalidDataException("Empty teaching mode configuration.");
         Current.Preview = false;
+        Current.HighlightStyle = Math.Clamp(Current.HighlightStyle, 0, 1);
+        Current.GlowIntensity = float.IsFinite(Current.GlowIntensity) ? Math.Clamp(Current.GlowIntensity, 0.2f, 2) : 1;
         Current.BorderWidth = Math.Clamp(Current.BorderWidth, 1, 8);
         Current.Damage ??= new() { Color = new(1, 0.15f, 0.12f, 1) };
         Current.Healing ??= new() { Color = new(0.1f, 1, 0.3f, 1) };

@@ -517,6 +517,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw -= ws.Draw;
         Svc.PluginInterface.UiBuilder.Draw -= Enhanced.HotbarHighlight.Draw;
+        Enhanced.HotbarHighlight.Dispose();
         Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenMainUi;
         Svc.PluginInterface.LanguageChanged -= Text.OnLanguageChanged;
         Svc.Toasts.ErrorToast -= OnErrorToast;

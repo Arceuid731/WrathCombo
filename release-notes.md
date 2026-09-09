@@ -1,11 +1,11 @@
-Wrath Combo Enhanced 1.0.0.2
+Wrath Combo Enhanced 1.0.0.3
 
-- With Auto-Rotation off, guidance now uses your selected enemy and normal healing priorities. Inactive Auto-Rotation modes such as Tank Target no longer suppress or redirect manual guidance.
-- While Auto-Rotation is enabled, Use Wrath's rotation targeting follows its target modes and falls back to your selected enemy if no valid damage target is found.
-- Remove the extra Manual play switch. The native Auto-Rotation settings, DTR toggle and IPC integrations control automatic execution. Existing native settings are preserved.
-- Add Teaching mode diagnostics to the Debug tab, with throttled idle-reason logging for missing recommendations.
-- Fix the job settings panel throwing an exception while a custom-action icon is still loading.
+- Hotbar highlights now default to a soft glow using the game's luminous action frame, with the existing Damage and Healing colors.
+- Adjust Glow intensity and Pulse highlights in Settings → Teaching mode. Choose Highlight style → Outline to keep the previous border.
+- The glow scales with the hotbar icon and keeps its center transparent. Frames are nested when both channels suggest the same slot.
+- Channel tooltips explain that support actions can be suggested by either the damage or healing rotation.
+- The frame texture is loaded once, disposed on unload, and falls back to outlines if unavailable.
 
-Update through the existing Dalamud repository. To test the reported case, keep native Auto-Rotation off, select a training dummy as Dancer with Simple Single Target enabled, and check the next-damage window and highlights.
+Update through the existing Dalamud repository. Your saved colors, window layouts and targeting preferences are preserved.
 
-Targeting with Auto-Rotation off/on and missing targets has regression coverage. Live action suggestions and hotbar alignment still require in-game confirmation.
+The texture and frame geometry were rendered against the installed game's Standard Step icon at 48, 64 and 96 pixels. In-game alignment still needs confirmation. Rotation selection and Astrologian's shared Astral Draw behavior are unchanged.

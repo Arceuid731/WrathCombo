@@ -34,10 +34,20 @@ internal static class TeachingSettings
             "Show sample actions so you can arrange the windows. Sample actions cannot be used.");
         changed |= Toggle("Use Wrath's rotation targeting", ref c.UseWrathTargeting,
             "Follow Auto-Rotation's target modes while it is enabled. Otherwise, use your selected enemy and normal healing target priorities. If Auto-Rotation finds no valid damage target, use your selected enemy.");
-        changed |= ImGui.SliderFloat("Outline thickness", ref c.BorderWidth, 1, 8, "%.1f");
-        Tooltip("Set the width of the colored outline around suggested hotbar actions.");
-        changed |= Toggle("Pulse outlines", ref c.Pulse,
-            "Gently brighten and dim the hotbar outlines to make them easier to spot.");
+        changed |= ImGui.Combo("Highlight style", ref c.HighlightStyle, "Glow\0Outline\0");
+        Tooltip("Glow adds a soft, luminous frame. Outline draws a plain border. Both use your Damage and Healing colors.");
+        if (c.HighlightStyle == 0)
+        {
+            changed |= ImGui.SliderFloat("Glow intensity", ref c.GlowIntensity, 0.2f, 2, "%.1f");
+            Tooltip("Make the glow softer or stronger without changing its color.");
+        }
+        else
+        {
+            changed |= ImGui.SliderFloat("Outline thickness", ref c.BorderWidth, 1, 8, "%.1f");
+            Tooltip("Set the width of the colored outline around suggested hotbar actions.");
+        }
+        changed |= Toggle("Pulse highlights", ref c.Pulse,
+            "Gently brighten and dim the highlights to make them easier to spot.");
         changed |= DrawChannel(c.Damage, false);
         changed |= DrawChannel(c.Healing, true);
         if (ImGui.Button("Reset window layout"))
@@ -64,9 +74,11 @@ internal static class TeachingSettings
         if (ImGui.TreeNodeEx(healing ? "Healing" : "Damage", ImGuiTreeNodeFlags.DefaultOpen))
         {
             changed |= Toggle("Highlight hotbar actions", ref c.Highlight,
-                "Outline the next suggested action on your hotbars, including matching Wrath custom buttons.");
+                healing
+                    ? "Highlight the next action from the healing rotation, including matching custom buttons. Shared support actions can also appear in Damage."
+                    : "Highlight the next action from the damage rotation, including matching custom buttons. Shared support actions can also appear in Healing.");
             changed |= ImGui.ColorEdit4("Color", ref c.Color, ImGuiColorEditFlags.NoInputs);
-            Tooltip("Choose the color and transparency of this channel's outlines and window accents.");
+            Tooltip("Choose the color and transparency of this channel's highlights and window accents.");
             changed |= Toggle("Show next action window", ref c.ShowWindow,
                 "Show this channel's next action in its own window. Hotbar highlights can stay on independently.");
             changed |= ImGui.Combo("Rotation", ref c.Rotation, "Automatic\0Single target\0Area of effect\0");
