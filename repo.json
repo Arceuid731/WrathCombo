@@ -1,0 +1,32 @@
+[
+  {
+    "Author": "Arceuid731 / Team Wrath",
+    "Name": "Wrath Combo Enhanced",
+    "InternalName": "WrathComboEnhanced",
+    "AssemblyVersion": "1.0.0.0",
+    "Description": "Learn your rotation with red damage highlights, green healing highlights, and two movable next-action windows showing their targets. Includes Wrath Combo's one-button rotations. Open settings with /wce. Enable only one Wrath Combo edition at a time.",
+    "ApplicableVersion": "any",
+    "RepoUrl": "https://github.com/Arceuid731/WrathCombo",
+    "Tags": [
+      "combo",
+      "wrath",
+      "teaching",
+      "healing",
+      "rotation",
+      "pve"
+    ],
+    "DalamudApiLevel": 15,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "IconUrl": "https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/res/plugin/wrathcombo.png",
+    "Punchline": "Wrath rotations with separate damage and healing guidance.",
+    "Changelog": "Separate damage and healing teaching mode, target hints, configurable action windows, and shared Wrath rotation settings.",
+    "AcceptsFeedback": true,
+    "DownloadLinkInstall": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.0/WrathComboEnhanced.zip",
+    "DownloadLinkUpdate": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.0/WrathComboEnhanced.zip",
+    "DownloadLinkTesting": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.0/WrathComboEnhanced.zip",
+    "LastUpdate": 1788987141
+  }
+]
