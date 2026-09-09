@@ -3,7 +3,7 @@
     "Author": "Arceuid731 / Team Wrath",
     "Name": "Wrath Combo Enhanced",
     "InternalName": "WrathComboEnhanced",
-    "AssemblyVersion": "1.0.0.2",
+    "AssemblyVersion": "1.0.0.3",
     "Description": "Learn your rotation with red damage highlights, green healing highlights, and two movable next-action windows showing their targets. Includes Wrath Combo's one-button rotations. Open settings with /wce. Enable only one Wrath Combo edition at a time.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Arceuid731/WrathCombo",
@@ -22,11 +22,11 @@
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/res/plugin/wrathcombo.png",
     "Punchline": "Wrath rotations with separate damage and healing guidance.",
-    "Changelog": "With Auto-Rotation off, guidance follows your selected enemy and normal healing priorities. Remove the redundant Manual play switch; use native Auto-Rotation settings. Add teaching diagnostics and fix custom-action icons while loading.",
+    "Changelog": "New soft glow highlights using the game's luminous action frame, with your damage and healing colors. Adjust Glow intensity or switch back to Outline in Teaching mode. Shared support actions are described in the channel tooltips.",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.2/WrathComboEnhanced.zip",
-    "DownloadLinkUpdate": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.2/WrathComboEnhanced.zip",
-    "DownloadLinkTesting": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.2/WrathComboEnhanced.zip",
-    "LastUpdate": 1788989915
+    "DownloadLinkInstall": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.3/WrathComboEnhanced.zip",
+    "DownloadLinkUpdate": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.3/WrathComboEnhanced.zip",
+    "DownloadLinkTesting": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.3/WrathComboEnhanced.zip",
+    "LastUpdate": 1788991036
   }
 ]
