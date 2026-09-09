@@ -239,15 +239,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
         DtrBarEntry ??= Svc.DtrBar.Get("Wrath Combo Enhanced");
         DtrBarEntry.OnClick = (_) =>
         {
-            if (Enhanced.EnhancedSettings.Current.ManualPlay)
-            {
-                OnOpenConfigUi();
-                return;
-            }
             AutoRotationController.ToggleAutoRotation(!Service.Configuration.RotationConfig.Enabled);
         };
         DtrBarEntry.Tooltip = new SeString(
-        new TextPayload("Wrath Combo Enhanced: click for settings in manual play, or to toggle Auto-Rotation.\n"),
+        new TextPayload("Wrath Combo Enhanced: click to toggle Auto-Rotation.\n"),
         new TextPayload("Disable this icon in /xlsettings -> Server Info Bar"));
 
         OpenerDtr ??= Svc.DtrBar.Get("Wrath Combo Enhanced Opener");
@@ -393,7 +388,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
                 ? BitmapFontIcon.SwordUnsheathed
                 : BitmapFontIcon.SwordSheathed);
 
-            var text = Enhanced.EnhancedSettings.Current.ManualPlay ? ": Manual" : autoOn ? ": On" : ": Off";
+            var text = autoOn ? ": On" : ": Off";
             if (!Service.Configuration.ShortDTRText && autoOn)
                 text += $" ({P.IPCSearch.ActiveJobPresets} active)";
             var ipcControlledText =

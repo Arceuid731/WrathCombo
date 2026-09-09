@@ -106,6 +106,11 @@ internal class Debug : ConfigWindow, IDisposable
     internal new static unsafe void Draw()
     {
         ImGui.Text("This is where you can figure out where it all went wrong.");
+        if (P.Teaching is { } teaching && ImGui.CollapsingHeader("Teaching mode diagnostics"))
+        {
+            ImGui.TextWrapped($"Damage: {teaching.DamageDiagnostic}");
+            ImGui.TextWrapped($"Healing: {teaching.HealingDiagnostic}");
+        }
         if (PingPluginIPC.CanGetPing)
             ImGui.Text($"Current Ping: {PingPluginIPC.LastPing}ms");
 

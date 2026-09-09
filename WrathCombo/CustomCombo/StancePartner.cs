@@ -62,7 +62,6 @@ public static class StancePartner
     /// </summary>
     private static readonly Action CheckStancePartner = () =>
     {
-        if (Enhanced.EnhancedSettings.Current.ManualPlay) return;
         PluginLog.Verbose("OnIPCInstanceChange: Trying to run StancePartner ..");
 
         // Whether we'll loop again, passed to Cast below

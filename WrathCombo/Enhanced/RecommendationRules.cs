@@ -1,7 +1,16 @@
+using System;
+
 namespace WrathCombo.Enhanced;
 
 internal static class RecommendationRules
 {
+    internal static T? DamageTarget<T>(bool useRotationTargeting, bool autoRotationEnabled, T? selected, T? rotationTarget,
+        Func<T, bool> valid) where T : class
+    {
+        if (useRotationTargeting && autoRotationEnabled && rotationTarget != null && valid(rotationTarget)) return rotationTarget;
+        return selected != null && valid(selected) ? selected : null;
+    }
+
     internal static bool AllowLane(int mode, bool area, bool healing, bool needsSingle,
         bool needsArea, int enemies, int areaThreshold)
     {

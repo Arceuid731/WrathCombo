@@ -51,6 +51,36 @@ Check(ConfigShape.CustomInts["Example"] == 42, "Static job settings imported");
 var serialized = JObject.FromObject(loaded, JsonSerializer.Create(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects }));
 Check((int)serialized["CustomIntValuesV6"]!["Example"]! == 42, "Static job settings exported");
 
+// Reproduce guidance on a selected dummy with Tank Target configured and no tank in the party.
+var dummy = new TargetShape(true, true, false);
+var tankTarget = new TargetShape(true, true, false);
+var friendly = new TargetShape(false, true, false);
+var dead = new TargetShape(true, true, true);
+var untargetable = new TargetShape(true, false, false);
+bool ValidDamageTarget(TargetShape t) => t.Hostile && t.Targetable && !t.Dead;
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, false, dummy, null, ValidDamageTarget), dummy),
+    "Auto-Rotation off with Tank Target configured guides the selected training dummy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, false, dummy, tankTarget, ValidDamageTarget), dummy),
+    "Auto-Rotation off ignores the tank target even when one exists");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, true, dummy, null, ValidDamageTarget), dummy),
+    "Auto-Rotation with no tank target falls back to the selected enemy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, true, dummy, tankTarget, ValidDamageTarget), tankTarget),
+    "Available Wrath rotation target keeps priority over the selected enemy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(false, true, dummy, tankTarget, ValidDamageTarget), dummy),
+    "Guidance with rotation targeting disabled follows the selected enemy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, true, dummy, friendly, ValidDamageTarget), dummy),
+    "Friendly tank target falls back to the selected enemy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, true, dummy, dead, ValidDamageTarget), dummy),
+    "Dead rotation target falls back to the selected enemy");
+Check(ReferenceEquals(RecommendationRules.DamageTarget(true, true, dummy, untargetable, ValidDamageTarget), dummy),
+    "Untargetable rotation target falls back to the selected enemy");
+Check(RecommendationRules.DamageTarget(true, true, friendly, null, ValidDamageTarget) == null,
+    "Fallback never turns an ally into a damage target");
+Check(RecommendationRules.DamageTarget(false, true, dead, tankTarget, ValidDamageTarget) == null,
+    "Manual targeting never silently switches away from a dead selected target");
+Check(RecommendationRules.DamageTarget<TargetShape>(true, true, null, null, ValidDamageTarget) == null,
+    "Guidance remains idle when neither target exists");
+
 Check(!RecommendationRules.AllowLane(0, true, false, false, false, 2, 3), "DPS area threshold respected");
 Check(RecommendationRules.AllowLane(0, true, false, false, false, 3, 3), "DPS area selected at threshold");
 Check(RecommendationRules.AllowLane(2, true, false, false, false, 1, 3), "Forced area mode respected");
@@ -98,3 +128,5 @@ internal sealed class ConfigShape
     [JsonProperty("EnabledActionsV6")] public HashSet<int> EnabledActions { get; set; } = [];
     [JsonProperty("CustomIntValuesV6")] internal static Dictionary<string, int> CustomInts { get; set; } = [];
 }
+
+internal sealed record TargetShape(bool Hostile, bool Targetable, bool Dead);

@@ -7,6 +7,6 @@
   "Description": "Learn your rotation with red damage highlights, green healing highlights, and two movable next-action windows showing their targets. Includes Wrath Combo's one-button rotations. Open settings with /wce. Enable only one Wrath Combo edition at a time.",
   "RepoUrl": "https://github.com/Arceuid731/WrathCombo",
   "IconUrl": "https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/res/plugin/wrathcombo.png",
-  "Changelog": "English teaching settings with simple tooltips. Unlock action windows to move and resize them; sizes are saved and icons fit the available space.",
+  "Changelog": "With Auto-Rotation off, guidance follows your selected enemy and normal healing priorities. Remove the redundant Manual play switch; use native Auto-Rotation settings. Add teaching diagnostics and fix custom-action icons while loading.",
   "Tags": ["combo", "wrath", "teaching", "healing", "rotation", "pve"]
 }

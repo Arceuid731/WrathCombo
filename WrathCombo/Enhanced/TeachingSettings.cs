@@ -26,8 +26,6 @@ internal static class TeachingSettings
         var c = EnhancedSettings.Current;
         bool changed = Toggle("Show rotation guidance", ref c.Enabled,
             "Show the next actions from your enabled job presets, in the windows and on your hotbars.");
-        changed |= Toggle("Manual play", ref c.ManualPlay,
-            "You choose when to act by pressing your hotbar buttons or clicking an enabled action window. Turn this off to allow Auto-Rotation.");
         changed |= Toggle("In combat only", ref c.CombatOnly,
             "Hide guidance outside combat. When off, damage suggestions still need a valid enemy target.");
         changed |= Toggle("Hide windows when no action is suggested", ref c.HideWhenIdle,
@@ -35,7 +33,7 @@ internal static class TeachingSettings
         changed |= Toggle("Preview windows", ref c.Preview,
             "Show sample actions so you can arrange the windows. Sample actions cannot be used.");
         changed |= Toggle("Use Wrath's rotation targeting", ref c.UseWrathTargeting,
-            "Use the target modes in Auto-Rotation. When off, use your selected enemy and your healing target priorities.");
+            "Follow Auto-Rotation's target modes while it is enabled. Otherwise, use your selected enemy and normal healing target priorities. If Auto-Rotation finds no valid damage target, use your selected enemy.");
         changed |= ImGui.SliderFloat("Outline thickness", ref c.BorderWidth, 1, 8, "%.1f");
         Tooltip("Set the width of the colored outline around suggested hotbar actions.");
         changed |= Toggle("Pulse outlines", ref c.Pulse,

@@ -10,7 +10,6 @@ internal sealed class EnhancedSettings
 {
     public static EnhancedSettings Current { get; private set; } = new();
     public bool Enabled = true;
-    public bool ManualPlay = true;
     public bool ShareRotationSettings = true;
     public bool CombatOnly;
     public bool HideWhenIdle = true;

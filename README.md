@@ -21,9 +21,11 @@ Install **Wrath Combo Enhanced**. Both editions can stay installed; enable only 
 
 Each window can show the action icon, action name, target name and GCD progress. Icons shrink to fit smaller windows; long names are shortened and available in full on hover. Target names are green when already selected and orange when another target is suggested. Click a target name to select it. **Click icon to use action** is optional and off by default. **Click through when locked** passes clicks to the game while locked; unlocked windows remain interactive for arranging the layout.
 
-Manual play is enabled by default. Use your normal hotbars, Wrath's custom one-button actions, or explicitly enable window clicks. Auto-Rotation is available after turning off Manual play.
+Use your normal hotbars, Wrath's custom one-button actions, or explicitly enable window clicks. Automatic execution is controlled by Wrath's native **Auto-Rotation** settings and IPC integrations. Teaching mode works with Auto-Rotation off or on.
 
-Damage and healing recommendations run independently. Automatic mode chooses single-target or area presets using the Wrath target-count and healing thresholds; each channel can also be set to single-target or area. Healing respects shields, regeneration and Excogitation thresholds. The default targets are your selected enemy and healing target priorities. Enable **Use Wrath's rotation targeting** to use the target modes configured under Auto-Rotation.
+Damage and healing recommendations run independently. Automatic mode chooses single-target or area presets using the Wrath target-count and healing thresholds; each channel can also be set to single-target or area. Healing respects shields, regeneration and Excogitation thresholds. With Auto-Rotation off, guidance uses your selected enemy and normal healing target priorities. **Use Wrath's rotation targeting** follows the configured target modes only while Auto-Rotation is enabled. If that mode has no valid damage target, guidance falls back to your selected enemy.
+
+If a window stays empty, **Debug → Teaching mode diagnostics** shows the latest evaluation. Changes in the reason for idle guidance are also recorded in the Dalamud log.
 
 Teaching mode currently covers PvE presets marked as full damage/healing rotations. Existing PvP and utility features remain available on hotbars. Item/pomander proxies are not displayed as spell recommendations. It does not add a separate rotation pack or rewrite Wrath's job priorities.
 
