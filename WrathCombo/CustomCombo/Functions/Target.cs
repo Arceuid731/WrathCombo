@@ -39,9 +39,10 @@ internal abstract partial class CustomComboFunctions
     }
 
     /// <summary> Gets the current target or null. </summary>
-    public static IBattleChara? CurrentTarget => 
-        OverrideTarget as IBattleChara ?? 
-        SimpleTarget.HardTarget;
+    public static IBattleChara? CurrentTarget =>
+        Enhanced.RecommendationContext.Current is { } preview
+            ? preview.Target as IBattleChara
+            : OverrideTarget as IBattleChara ?? SimpleTarget.HardTarget;
 
     #region Target Checks
 

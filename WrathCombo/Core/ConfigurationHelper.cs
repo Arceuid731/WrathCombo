@@ -61,7 +61,7 @@ public partial class Configuration
         {
             PluginLog.Verbose(
                 "[Saving] Attempting to save ...");
-            Svc.PluginInterface.SavePluginConfig(config);
+            Enhanced.SharedConfiguration.Save(config);
             _isSaving = false;
             PluginLog.Verbose(
                 $"[Saving] Saved (queue size now: {SaveQueue.Count})");
@@ -91,7 +91,7 @@ public partial class Configuration
             {
                 PluginLog.Verbose(
                     $"[Saving] Retrying save ... (attempt {retryCount})");
-                Svc.PluginInterface.SavePluginConfig(config);
+                Enhanced.SharedConfiguration.Save(config);
                 success = true;
                 PluginLog.Verbose(
                     $"[Saving] Saved (queue size now: {SaveQueue.Count})");

@@ -76,7 +76,7 @@ internal abstract partial class CustomCombo : CustomComboFunctions
             return false;
 
 
-        if (ActionRequestIPCProvider.TryGetRequestedAction(out var id))
+        if (Enhanced.RecommendationContext.Current == null && ActionRequestIPCProvider.TryGetRequestedAction(out var id))
         {
             newActionID = id;
             return true;

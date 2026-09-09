@@ -561,6 +561,8 @@ public static class ActionWatching
     /// <summary> Handles logic when an action is used. </summary>
     private unsafe static bool UseActionDetour(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted)
     {
+        if (Enhanced.RecommendationContext.ExecutingClick)
+            return UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
         try
         {
             if (actionType is ActionType.Action)

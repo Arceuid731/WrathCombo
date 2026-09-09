@@ -112,6 +112,8 @@ internal sealed class ActionReplacer : IDisposable
     /// </remarks>
     private uint GetAdjustedActionDetour(IntPtr _, uint actionID)
     {
+        if (Enhanced.RecommendationContext.ExecutingClick)
+            return OriginalHook(actionID);
         try
         {
             if (FilteredCombos is null)

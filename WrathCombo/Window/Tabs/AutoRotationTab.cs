@@ -32,11 +32,19 @@ internal class AutoRotationTab : ConfigWindow
         var cfg = Service.Configuration.RotationConfig;
         bool changed = false;
 
+        if (Enhanced.EnhancedSettings.Current.ManualPlay)
+        {
+            ImGui.TextWrapped(Enhanced.TeachingSettings.L("Manual play is active. Change it in Settings > Teaching mode to use Auto-Rotation.",
+                "Le jeu manuel est actif. Modifiez ce choix dans Réglages > Mode pédagogique pour utiliser l’Auto-Rotation."));
+        }
+
+        ImGui.BeginDisabled(Enhanced.EnhancedSettings.Current.ManualPlay);
         if (P.UIHelper.ShowIPCControlledIndicatorIfNeeded())
             changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
                 AutoRotationUI.Checkbox_EnableAutoRotation, ref cfg.Enabled);
         else
             changed |= ImGui.Checkbox(AutoRotationUI.Checkbox_EnableAutoRotation, ref cfg.Enabled);
+        ImGui.EndDisabled();
 
         ImGuiEx.TextUnderlined(AutoRotationUI.CombatSettingHeader);
 

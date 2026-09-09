@@ -3,20 +3,21 @@
 
     <!-- Metadata -->
     <PropertyGroup>
-        <Authors>Team Wrath</Authors>
+        <Authors>Arceuid731;Team Wrath</Authors>
         <Company>-</Company>
-        <Version>1.0.4.23</Version>
+        <Version>1.0.0.0</Version>
         <!-- This is the version that will be used when pushing to the repo.-->
-        <Description>XIVCombo for very lazy players</Description>
+        <Description>Wrath rotations with separate damage and healing guidance.</Description>
         <Copyright>Copyleft attick 2021 thanks attick UwU</Copyright>
-        <PackageProjectUrl>https://github.com/PunishXIV/WrathCombo</PackageProjectUrl>
-        <PackageId>WrathCombo</PackageId>
-        <Product>WrathCombo</Product>
+        <PackageProjectUrl>https://github.com/Arceuid731/WrathCombo</PackageProjectUrl>
+        <PackageId>WrathComboEnhanced</PackageId>
+        <Product>Wrath Combo Enhanced</Product>
     </PropertyGroup>
 
     <!-- Build Parameters -->
     <PropertyGroup>
-        <AssemblyName>WrathCombo</AssemblyName>
+        <AssemblyName>WrathComboEnhanced</AssemblyName>
+        <RootNamespace>WrathCombo</RootNamespace>
         <TargetFramework>net10.0-windows</TargetFramework>
         <Configurations>Debug;Release</Configurations>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -43,8 +44,8 @@
     <!-- Required Paths -->
     <PropertyGroup>
         <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-        <DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\WrathCombo\</DalamudDevPlugins>
-        <DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\WrathCombo\$(version)</DalamudPluginPath>
+        <DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\WrathComboEnhanced\</DalamudDevPlugins>
+        <DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\WrathComboEnhanced\$(version)</DalamudPluginPath>
     </PropertyGroup>
 
     <!-- Path Overrides for Linux -->
@@ -71,6 +72,8 @@
 
     <!-- Logo -->
     <ItemGroup>
+        <Content Include="..\LICENSE" Link="LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="..\ECommons\LICENSE.md" Link="licenses\ECommons.md" CopyToOutputDirectory="PreserveNewest" />
         <Content Include="..\res\plugin\wrathcombo.png" Link="images\wrathcombo.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
     </ItemGroup>
 
@@ -455,7 +458,7 @@
         <None Update="Resources\WrathAutoToggle.png">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="WrathCombo.json">
+        <None Update="WrathComboEnhanced.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

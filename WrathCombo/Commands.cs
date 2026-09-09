@@ -30,8 +30,8 @@ namespace WrathCombo;
 
 public partial class WrathCombo
 {
-    private const string Command = "/wrath";
-    private const string OldCommand = "/scombo";
+    private const string Command = "/wrathenhanced";
+    private const string OldCommand = "/wce";
 
     private static readonly Dictionary<Job, Preset[]> BurstPresetMap = new()
     {
@@ -130,7 +130,7 @@ public partial class WrathCombo
             "Open a window to edit custom combo settings.\n" +
             $"{Command} auto → Toggle Auto-rotation on/off.\n" +
             $"{Command} debug → Dumps a debug log onto your desktop for developers.\n" +
-            $"{OldCommand} → Old alias from XIVSlothCombo, still works!");
+            $"{OldCommand} → Short alias for Wrath Combo Enhanced");
         EzCmd.Add(OldCommand, OnCommand);
     }
 
@@ -577,7 +577,7 @@ public partial class WrathCombo
                         return;
                     }
                 default:
-                    DuoLog.Error("Usage: /wrath auto target <damage|healer> <mode>");
+                    DuoLog.Error("Usage: /wce auto target <damage|healer> <mode>");
                     return;
             }
         }

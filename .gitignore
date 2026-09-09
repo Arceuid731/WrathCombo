@@ -1,6 +1,10 @@
 # Build Artifacts
 WrathCombo/obj/
 WrathCombo/bin/
+**/bin/
+**/obj/
+*.log
+artifacts/
 
 # IDE-specific files
 .idea/

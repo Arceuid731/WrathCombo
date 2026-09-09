@@ -1,0 +1,61 @@
+name: Build and release Wrath Combo Enhanced
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['repo.json', 'docs/**', '*.md']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wrath-enhanced-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Download Dalamud
+        shell: pwsh
+        run: |
+          $destination = "$env:APPDATA\XIVLauncher\addon\Hooks\dev"
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          Invoke-WebRequest https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile Dalamud.zip
+          Expand-Archive Dalamud.zip -DestinationPath $destination -Force
+      - name: Test configuration sharing and recommendations
+        run: dotnet run --project Enhanced.Tests/Enhanced.Tests.csproj -c Release
+      - name: Build plugin
+        shell: pwsh
+        run: |
+          dotnet build WrathCombo/WrathCombo.csproj -c Release --output artifacts/build --nologo > artifacts-build.log 2>&1
+          if ($LASTEXITCODE -ne 0) { Get-Content artifacts-build.log -Tail 80; exit $LASTEXITCODE }
+      - name: Validate package
+        run: ./.github/scripts/validate-package.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WrathComboEnhanced
+          path: artifacts/WrathComboEnhanced.zip
+      - name: Publish release and Dalamud manifest
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/scripts/publish.ps1
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-log
+          path: artifacts-build.log
+

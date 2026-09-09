@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.Gui.Dtr;
+using Dalamud.Game.Gui.Dtr;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -70,7 +70,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
 
     internal static bool IsAprilFools => DateTime.UtcNow.Day == 1 && DateTime.UtcNow.Month == 4;
 
-    private readonly TextPayload starterMotd = new("[Wrath Message of the Day] ");
+    private readonly TextPayload starterMotd = new("[Wrath Combo Enhanced] ");
     private static Job? jobID;
     private static bool EnteringInstancedContent
     {
@@ -178,15 +178,16 @@ public sealed partial class WrathCombo : IDalamudPlugin
     /// <param name="pluginInterface"> Dalamud plugin interface. </param>
     public WrathCombo(IDalamudPluginInterface pluginInterface)
     {
+        if (pluginInterface.InstalledPlugins.Any(p => p.InternalName == "WrathCombo" && p.IsLoaded))
+            throw new InvalidOperationException("Disable Wrath Combo before enabling Wrath Combo Enhanced.");
         P = this;
         pluginInterface.Create<Service>();
         ECommonsMain.Init(pluginInterface, this, Module.All);
-        PunishLibMain.Init(pluginInterface, "Wrath Combo");
+        PunishLibMain.Init(pluginInterface, "Wrath Combo Enhanced");
         ActionRequestIPCProvider.Initialize();
 
         TM = new();
-        RemoveNullAutos();
-        Service.Configuration = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        Service.Configuration = Enhanced.SharedConfiguration.Load();
         Service.Address = new AddressResolver();
         Service.Address.Setup(Svc.SigScanner);
         MoveHook = new();
@@ -222,25 +223,34 @@ public sealed partial class WrathCombo : IDalamudPlugin
         ws.AddWindow(ConfigWindow);
         ws.AddWindow(_majorChangesWindow);
         ws.AddWindow(TargetHelper);
+        Teaching = new Enhanced.TeachingController();
+        ws.AddWindow(new Enhanced.NextActionWindow(Teaching, false) { IsOpen = true });
+        ws.AddWindow(new Enhanced.NextActionWindow(Teaching, true) { IsOpen = true });
 
         Configuration.ConfigChanged += DebugFile.LoggingConfigChanges;
 
         Svc.PluginInterface.UiBuilder.Draw += ws.Draw;
+        Svc.PluginInterface.UiBuilder.Draw += Enhanced.HotbarHighlight.Draw;
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenMainUi;
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
 
         RegisterCommands();
 
-        DtrBarEntry ??= Svc.DtrBar.Get("Wrath Combo");
+        DtrBarEntry ??= Svc.DtrBar.Get("Wrath Combo Enhanced");
         DtrBarEntry.OnClick = (_) =>
         {
+            if (Enhanced.EnhancedSettings.Current.ManualPlay)
+            {
+                OnOpenConfigUi();
+                return;
+            }
             AutoRotationController.ToggleAutoRotation(!Service.Configuration.RotationConfig.Enabled);
         };
         DtrBarEntry.Tooltip = new SeString(
-        new TextPayload("Click to toggle Wrath Combo's Auto-Rotation.\n"),
+        new TextPayload("Wrath Combo Enhanced: click for settings in manual play, or to toggle Auto-Rotation.\n"),
         new TextPayload("Disable this icon in /xlsettings -> Server Info Bar"));
 
-        OpenerDtr ??= Svc.DtrBar.Get("Wrath Combo Opener");
+        OpenerDtr ??= Svc.DtrBar.Get("Wrath Combo Enhanced Opener");
 
         OpenerDtr.OnClick += (_) =>
         {
@@ -335,7 +345,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
     }
 
     public const string OptionControlledByIPC =
-        "(being overwritten by another plugin, check the setting in /wrath)";
+        "(being overwritten by another plugin, check the setting in /wce)";
 
     private void OnFrameworkUpdate(IFramework framework)
     {
@@ -344,6 +354,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
             #region Checks that don't require the Player to be loaded
 
             Configuration.ProcessSaveQueue();
+            Teaching.Update();
 
             //Hacky workaround to ensure it's always running
             CustomComboFunctions.IsMoving();
@@ -382,7 +393,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
                 ? BitmapFontIcon.SwordUnsheathed
                 : BitmapFontIcon.SwordSheathed);
 
-            var text = autoOn ? ": On" : ": Off";
+            var text = Enhanced.EnhancedSettings.Current.ManualPlay ? ": Manual" : autoOn ? ": On" : ": Off";
             if (!Service.Configuration.ShortDTRText && autoOn)
                 text += $" ({P.IPCSearch.ActiveJobPresets} active)";
             var ipcControlledText =
@@ -453,10 +464,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
     {
         try
         {
-            var basicMessage = $"Welcome to WrathCombo v{GetType().Assembly
+            var basicMessage = $"Welcome to Wrath Combo Enhanced v{GetType().Assembly
                 .GetName().Version}!";
             using var motd =
-                HTTPClient.GetAsync("https://raw.githubusercontent.com/PunishXIV/WrathCombo/main/res/motd.txt").Result;
+                HTTPClient.GetAsync("https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/res/motd.txt").Result;
             motd.EnsureSuccessStatusCode();
             var data = motd.Content.ReadAsStringAsync().Result;
             List<Payload> payloads =
@@ -481,7 +492,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used for non-static only window initialization")]
-    public string Name => MainWindowUI.Wrath_Combo;
+    public string Name => "Wrath Combo Enhanced";
+
+    internal Enhanced.TeachingController Teaching { get; }
+    internal int TeachingWindowReset;
 
     /// <inheritdoc/>
     public void Dispose()
@@ -500,13 +514,17 @@ public sealed partial class WrathCombo : IDalamudPlugin
             }
 
         ws.RemoveAllWindows();
-        Svc.DtrBar.Remove("Wrath Combo");
-        Svc.DtrBar.Remove("Wrath Combo Opener");
+        Svc.DtrBar.Remove("Wrath Combo Enhanced");
+        Svc.DtrBar.Remove("Wrath Combo Enhanced Opener");
         Configuration.ConfigChanged -= DebugFile.LoggingConfigChanges;
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.Draw -= DrawUI;
+        Svc.PluginInterface.UiBuilder.Draw -= ws.Draw;
+        Svc.PluginInterface.UiBuilder.Draw -= Enhanced.HotbarHighlight.Draw;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenMainUi;
+        Svc.PluginInterface.LanguageChanged -= Text.OnLanguageChanged;
+        Svc.Toasts.ErrorToast -= OnErrorToast;
 
         Service.ActionReplacer.Dispose();
         Service.ComboCache.Dispose();

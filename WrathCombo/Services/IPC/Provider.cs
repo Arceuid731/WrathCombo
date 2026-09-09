@@ -321,9 +321,9 @@ public partial class Provider : IDisposable
     /// </remarks>
     [EzIPC]
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
-    public bool GetAutoRotationState() =>
+    public bool GetAutoRotationState() => !Enhanced.EnhancedSettings.Current.ManualPlay && (
         Leasing.CheckAutoRotationControlled() ??
-        Service.Configuration.RotationConfig.Enabled;
+        Service.Configuration.RotationConfig.Enabled);
 
     /// <summary>
     ///     Set the state of Auto-Rotation in Wrath Combo.

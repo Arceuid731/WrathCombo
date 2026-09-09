@@ -85,6 +85,11 @@ public class ActionRetargeting : IDisposable
         uint[] replacedActions,
         Func<IGameObject?> resolver)
     {
+        if (Enhanced.RecommendationContext.Current is { } preview)
+        {
+            preview.Retargets[action] = resolver;
+            return action;
+        }
         // Make sure the action is not in replaced actions,
         // and there are no duplicates
         replacedActions = replacedActions.Distinct().ToArray();

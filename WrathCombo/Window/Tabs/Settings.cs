@@ -117,6 +117,7 @@ internal class Settings : ConfigWindow
             ImGui.Text(SettingsUI.Header_SettingsAbout);
 
             DrawSearchBar();
+            Enhanced.TeachingSettings.Draw();
 
             _currentCategory = null;
             _settingCount = 0;

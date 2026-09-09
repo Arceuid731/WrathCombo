@@ -121,6 +121,7 @@ internal unsafe class AutoRotationController
     public void Dispose()
     {
         OnPartyCombatChanged -= ResetError;
+        OnStatusChanged -= StatusChanged;
         Svc.Chat.ChatMessage -= ScanForWarnings;
     }
 
@@ -1098,7 +1099,8 @@ internal unsafe class AutoRotationController
                     {
                         originalAct = actToCheck;
                         outAct = changedAct;
-                        Service.ActionReplacer.LastActionInvokeFor[actToCheck] = outAct;
+                        if (Enhanced.RecommendationContext.Current == null)
+                            Service.ActionReplacer.LastActionInvokeFor[actToCheck] = outAct;
                         break;
                     }
                 }
@@ -1252,6 +1254,15 @@ internal unsafe class AutoRotationController
 
     public static class HealerTargeting
     {
+        internal static bool NeedsSingleTargetHeal(IBattleChara? target) =>
+            target is { IsDead: false, IsTargetable: true } && target.IsFriendly() &&
+            GetTargetDistance(target) <= QueryRange && !TargetHasImmortality(target) &&
+            !StatusCache.HasStatusInCacheList(StatusCache.DoNotHealStatuses, target) &&
+            GetTargetHPPercent(target, cfg.HealerSettings.IncludeShields) <=
+                (TargetHasExcog(target) ? cfg.HealerSettings.SingleTargetExcogHPP :
+                 TargetHasRegen(target) ? cfg.HealerSettings.SingleTargetRegenHPP :
+                 cfg.HealerSettings.SingleTargetHPP) && IsInLineOfSight(target);
+
         internal static IBattleChara? ManualTarget()
         {
             if (SimpleTarget.HardTarget is not { } t) return null;
