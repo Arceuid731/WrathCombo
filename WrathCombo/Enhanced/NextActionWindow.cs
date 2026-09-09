@@ -14,7 +14,7 @@ internal sealed class NextActionWindow(TeachingController controller, bool heali
 {
     private ChannelSettings Settings => healing ? EnhancedSettings.Current.Healing : EnhancedSettings.Current.Damage;
     private Recommendation? Action => healing ? controller.Healing : controller.Damage;
-    private bool positionDirty;
+    private bool layoutDirty;
     private int lastReset = -1;
 
     public override bool DrawConditions()
@@ -29,27 +29,35 @@ internal sealed class NextActionWindow(TeachingController controller, bool heali
     {
         IsOpen = true;
         RespectCloseHotkey = false;
-        Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar |
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings |
-                ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
-        if (Settings.Locked) Flags |= ImGuiWindowFlags.NoMove;
-        if (Settings.ClickThrough) Flags |= ImGuiWindowFlags.NoInputs;
+        Flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings |
+                ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoScrollbar;
+        if (Settings.Locked) Flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
+        if (Settings.PassThrough) Flags |= ImGuiWindowFlags.NoInputs;
+        var scale = ImGuiHelpers.GlobalScale;
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.03f, 0.035f, 0.05f, Settings.Opacity));
+        ImGui.PushStyleColor(ImGuiCol.Border, Settings.Color);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 8);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6 * scale));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 3) * scale);
+        var overhead = (ImGui.GetTextLineHeightWithSpacing() + DetailsHeight() + ImGui.GetStyle().WindowPadding.Y * 2) / scale;
+        var minimum = new Vector2(64, 24 + overhead);
+        SizeConstraints = new WindowSizeConstraints { MinimumSize = minimum, MaximumSize = new Vector2(800) };
+        Size = Vector2.Max(minimum, Settings.WindowSize ?? new Vector2(Math.Max(Settings.IconSize, 96) + 12, Settings.IconSize + overhead));
+        SizeCondition = Settings.Locked ? ImGuiCond.Always : ImGuiCond.Appearing;
         Position = Settings.Position ?? new Vector2(healing ? 470 : 260, 300);
         PositionCondition = ImGuiCond.Appearing;
         if (lastReset != P.TeachingWindowReset)
         {
             PositionCondition = ImGuiCond.Always;
+            SizeCondition = ImGuiCond.Always;
             lastReset = P.TeachingWindowReset;
         }
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.03f, 0.035f, 0.05f, Settings.Opacity));
-        ImGui.PushStyleColor(ImGuiCol.Border, Settings.Color);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 8);
     }
 
     public override void PostDraw()
     {
-        ImGui.PopStyleVar(2);
+        ImGui.PopStyleVar(4);
         ImGui.PopStyleColor(2);
     }
 
@@ -57,10 +65,12 @@ internal sealed class NextActionWindow(TeachingController controller, bool heali
     {
         var preview = EnhancedSettings.Current.Preview;
         var action = TeachingController.IsFresh(Action) && !preview ? Action : null;
-        var label = TeachingSettings.L(healing ? "Next heal" : "Next damage", healing ? "Prochain soin" : "Prochaine attaque");
-        var size = Settings.IconSize * ImGuiHelpers.GlobalScale;
-        var width = Math.Max(size, 150 * ImGuiHelpers.GlobalScale);
-        ImGui.TextColored(Settings.Color, label);
+        var label = healing ? "Next heal" : "Next damage";
+        DrawLine(label, Settings.Color, Settings.Locked ? label : "Drag to move. Drag a corner to resize.");
+        var available = ImGui.GetContentRegionAvail();
+        var width = available.X;
+        var size = Math.Max(1, Math.Min(Settings.IconSize * ImGuiHelpers.GlobalScale,
+            Math.Min(width, available.Y - DetailsHeight())));
         var actionId = action?.ActionId ?? (preview ? (healing ? 120u : 119u) : 0);
         var row = actionId != 0 ? Svc.Data.GetExcelSheet<ActionRow>().GetRowOrDefault(actionId) : null;
         var icon = row.HasValue ? Svc.Texture.GetFromGameIcon((uint)row.Value.Icon).GetWrapOrDefault() : null;
@@ -94,36 +104,63 @@ internal sealed class NextActionWindow(TeachingController controller, bool heali
 
         if (Settings.ShowActionName)
         {
-            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + width);
-            ImGui.TextUnformatted(row?.Name.ToString() ?? TeachingSettings.L("Waiting", "En attente"));
-            ImGui.PopTextWrapPos();
+            DrawLine(row?.Name.ToString() ?? "Waiting");
         }
         if (Settings.ShowTarget && (action != null || preview))
         {
-            var name = preview ? Player.Name : action!.TargetName;
+            var name = preview ? Player.Name ?? "Target" : action!.TargetName;
             var selected = action?.TargetId == Svc.Targets.Target?.GameObjectId || action?.TargetId == Player.Object?.GameObjectId;
-            ImGui.PushStyleColor(ImGuiCol.Text, selected || preview ? new Vector4(0.35f, 1, 0.5f, 1) : new Vector4(1, 0.65f, 0.2f, 1));
-            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + width);
-            ImGui.TextUnformatted(name);
-            ImGui.PopTextWrapPos();
-            ImGui.PopStyleColor();
-            if (!preview && action != null && ImGui.IsItemClicked(ImGuiMouseButton.Left)) controller.Click(action, true);
-            if (ImGui.IsItemHovered()) ImGui.SetTooltip(TeachingSettings.L("Click to target", "Cliquer pour cibler"));
+            var clicked = DrawLine(name, selected || preview ? new Vector4(0.35f, 1, 0.5f, 1) : new Vector4(1, 0.65f, 0.2f, 1),
+                preview ? name : $"{name}\nClick to target.");
+            if (!preview && action != null && clicked) controller.Click(action, true);
         }
 
-        if (!Settings.Locked && !Settings.ClickThrough)
+        if (!Settings.Locked)
         {
             var position = ImGui.GetWindowPos();
-            if (Settings.Position != position)
+            var windowSize = ImGui.GetWindowSize() / ImGuiHelpers.GlobalScale;
+            if (Settings.Position != position || Settings.WindowSize is not { } savedSize ||
+                Vector2.DistanceSquared(savedSize, windowSize) > 0.25f)
             {
                 Settings.Position = position;
-                positionDirty = true;
+                Settings.WindowSize = windowSize;
+                layoutDirty = true;
             }
-            if (positionDirty && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            if (layoutDirty && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
             {
                 EnhancedSettings.Current.Save();
-                positionDirty = false;
+                layoutDirty = false;
             }
         }
+    }
+
+    // Reserve the target line even while idle so recommendations do not change the icon size.
+    private float DetailsHeight() =>
+        (Settings.ShowActionName ? ImGui.GetTextLineHeightWithSpacing() : 0) +
+        (Settings.ShowTarget ? ImGui.GetTextLineHeightWithSpacing() : 0) +
+        (Settings.ShowCooldown ? 4 * ImGuiHelpers.GlobalScale + ImGui.GetStyle().ItemSpacing.Y : 0);
+
+    private static bool DrawLine(string text, Vector4? color = null, string? tooltip = null)
+    {
+        var available = ImGui.GetContentRegionAvail().X;
+        var shown = text;
+        if (ImGui.CalcTextSize(text).X > available)
+        {
+            var low = 0;
+            var high = text.Length;
+            while (low < high)
+            {
+                var middle = (low + high + 1) / 2;
+                if (ImGui.CalcTextSize(text[..middle] + "…").X <= available) low = middle;
+                else high = middle - 1;
+            }
+            shown = text[..low] + "…";
+        }
+        if (color.HasValue) ImGui.PushStyleColor(ImGuiCol.Text, color.Value);
+        ImGui.TextUnformatted(shown);
+        if (color.HasValue) ImGui.PopStyleColor();
+        var clicked = ImGui.IsItemClicked(ImGuiMouseButton.Left);
+        TeachingSettings.Tooltip(tooltip ?? text);
+        return clicked;
     }
 }

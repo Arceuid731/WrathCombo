@@ -53,17 +53,23 @@ internal sealed class ChannelSettings
     public bool ShowActionName = true;
     public bool ShowTarget = true;
     public bool ShowCooldown = true;
-    public float IconSize = 64;
+    public float IconSize = 48;
     public float Opacity = 0.65f;
     public Vector4 Color;
     // 0: automatic, 1: single target, 2: area of effect.
     public int Rotation;
     public Vector2? Position;
+    // Window dimensions in logical pixels, independent of Dalamud UI scale.
+    public Vector2? WindowSize;
+
+    [JsonIgnore] internal bool PassThrough => Locked && ClickThrough;
 
     internal void Sanitize()
     {
-        IconSize = Math.Clamp(IconSize, 32, 160);
+        IconSize = Math.Clamp(IconSize, 24, 160);
         Opacity = Math.Clamp(Opacity, 0, 1);
         Rotation = Math.Clamp(Rotation, 0, 2);
+        if (WindowSize is { } size && (!float.IsFinite(size.X) || !float.IsFinite(size.Y) || size.X <= 0 || size.Y <= 0))
+            WindowSize = null;
     }
 }

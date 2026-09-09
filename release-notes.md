@@ -1,13 +1,12 @@
-Wrath Combo Enhanced adds separate damage and healing guidance to Wrath Combo 1.0.4.23.
+Wrath Combo Enhanced 1.0.0.1
 
-- Red damage and green healing hotbar outlines, including custom action buttons and cross hotbars.
-- Two movable next-action windows with action icons, names, target hints and GCD bars.
-- Independent window locking, click-through, optional click-to-use, colors, size and opacity.
-- Settings > Teaching mode, available in English and French. Manual play is enabled by default.
-- Reuses enabled Wrath presets without requiring Auto-Rotation or auto-action selections.
-- Shares rotation settings with the original Wrath Combo; teaching settings are saved separately. Backups and stale-write checks protect the original configuration.
-- Separate plugin identity and commands: `/wce` or `/wrathenhanced`. Keep only one Wrath edition enabled.
+- Teaching settings, action window labels and status messages now use English regardless of the Dalamud UI language.
+- Every teaching setting has a simple tooltip describing its effect.
+- Next-action windows can be resized from their corners when unlocked, with independent saved sizes and positions.
+- The starting layout is narrower. Icons shrink to fit smaller windows; shortened names remain readable in tooltips.
+- Lock window now locks both position and size. Click-through applies while locked, so unlocking always allows moving and resizing.
+- Reset window layout restores compact dimensions and starting positions.
 
-Install repository: `https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/repo.json`
+Update through the existing Dalamud repository. Open `/wce` → Settings → Teaching mode and turn off **Lock window** to resize.
 
-Build, package and detached configuration/selection tests are automated. Rendering, cross-hotbar alignment and live combat behavior still need in-game validation.
+Rotation selection and Dancer pre-pull behavior are unchanged. Build, package and detached tests are validated; live resizing still needs in-game confirmation.

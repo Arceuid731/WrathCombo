@@ -162,11 +162,11 @@ internal sealed unsafe class TeachingController
         var healing = displayed.Healing;
         if (!CanShow) return;
         var channel = healing ? EnhancedSettings.Current.Healing : EnhancedSettings.Current.Damage;
-        if (channel.ClickThrough || (!targetOnly && !channel.ClickToUse)) return;
+        if (channel.PassThrough || (!targetOnly && !channel.ClickToUse)) return;
         // Re-evaluate on the framework thread: never cast on a stale displayed target.
         Svc.Framework.RunOnFrameworkThread(() =>
         {
-            if (!CanShow || channel.ClickThrough || (!targetOnly && !channel.ClickToUse) ||
+            if (!CanShow || channel.PassThrough || (!targetOnly && !channel.ClickToUse) ||
                 !IsFresh(displayed)) return;
             var action = Select(healing);
             if (action == null || action.ActionId != displayed.ActionId || action.TargetId != displayed.TargetId) return;

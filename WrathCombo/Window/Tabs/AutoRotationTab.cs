@@ -34,8 +34,7 @@ internal class AutoRotationTab : ConfigWindow
 
         if (Enhanced.EnhancedSettings.Current.ManualPlay)
         {
-            ImGui.TextWrapped(Enhanced.TeachingSettings.L("Manual play is active. Change it in Settings > Teaching mode to use Auto-Rotation.",
-                "Le jeu manuel est actif. Modifiez ce choix dans Réglages > Mode pédagogique pour utiliser l’Auto-Rotation."));
+            ImGui.TextWrapped("Manual play is active. Change it in Settings > Teaching mode to use Auto-Rotation.");
         }
 
         ImGui.BeginDisabled(Enhanced.EnhancedSettings.Current.ManualPlay);

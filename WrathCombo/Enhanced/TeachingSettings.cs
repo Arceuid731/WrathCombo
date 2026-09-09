@@ -1,44 +1,57 @@
-using ECommons.DalamudServices;
-using System.Globalization;
-
 namespace WrathCombo.Enhanced;
 
 internal static class TeachingSettings
 {
-    internal static string L(string english, string french) =>
-        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "fr" ? french : english;
+    internal static void Tooltip(string text)
+    {
+        if (!ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) return;
+        ImGui.BeginTooltip();
+        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 24);
+        ImGui.TextUnformatted(text);
+        ImGui.PopTextWrapPos();
+        ImGui.EndTooltip();
+    }
+
+    private static bool Toggle(string label, ref bool value, string help)
+    {
+        var changed = ImGui.Checkbox(label, ref value);
+        Tooltip(help);
+        return changed;
+    }
 
     internal static void Draw()
     {
-        if (!ImGui.CollapsingHeader(L("Teaching mode", "Mode pédagogique"), ImGuiTreeNodeFlags.DefaultOpen)) return;
+        if (!ImGui.CollapsingHeader("Teaching mode", ImGuiTreeNodeFlags.DefaultOpen)) return;
         ImGui.PushID("EnhancedTeaching");
         var c = EnhancedSettings.Current;
-        bool changed = ImGui.Checkbox(L("Show rotation guidance", "Afficher les conseils de rotation"), ref c.Enabled);
-        changed |= ImGui.Checkbox(L("Manual play", "Jeu manuel"), ref c.ManualPlay);
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(L("Use your hotbars or click an enabled action window to act.", "Utilisez vos barres ou une fenêtre d’action activée pour lancer vos sorts."));
-        changed |= ImGui.Checkbox(L("In combat only", "En combat uniquement"), ref c.CombatOnly);
-        changed |= ImGui.Checkbox(L("Hide windows when no action is suggested", "Masquer les fenêtres sans action conseillée"), ref c.HideWhenIdle);
-        changed |= ImGui.Checkbox(L("Preview windows", "Aperçu des fenêtres"), ref c.Preview);
-        changed |= ImGui.Checkbox(L("Use Wrath's rotation targeting", "Utiliser le ciblage de rotation Wrath"), ref c.UseWrathTargeting);
-        if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(L("Otherwise: selected enemy and your healing target priorities.", "Sinon : ennemi sélectionné et vos priorités de ciblage des soins."));
-        ImGui.TextWrapped(L("Enable a damage and healing preset for your job. Healing thresholds follow the Auto-Rotation settings.",
-            "Activez les presets de dégâts et de soins de votre job. Les seuils de soin suivent les réglages d’Auto-Rotation."));
-        changed |= ImGui.SliderFloat(L("Outline thickness", "Épaisseur des contours"), ref c.BorderWidth, 1, 8, "%.1f");
-        changed |= ImGui.Checkbox(L("Pulse outlines", "Animer les contours"), ref c.Pulse);
+        bool changed = Toggle("Show rotation guidance", ref c.Enabled,
+            "Show the next actions from your enabled job presets, in the windows and on your hotbars.");
+        changed |= Toggle("Manual play", ref c.ManualPlay,
+            "You choose when to act by pressing your hotbar buttons or clicking an enabled action window. Turn this off to allow Auto-Rotation.");
+        changed |= Toggle("In combat only", ref c.CombatOnly,
+            "Hide guidance outside combat. When off, damage suggestions still need a valid enemy target.");
+        changed |= Toggle("Hide windows when no action is suggested", ref c.HideWhenIdle,
+            "Hide each window when it has no suggestion. Turn this off to keep an empty window visible.");
+        changed |= Toggle("Preview windows", ref c.Preview,
+            "Show sample actions so you can arrange the windows. Sample actions cannot be used.");
+        changed |= Toggle("Use Wrath's rotation targeting", ref c.UseWrathTargeting,
+            "Use the target modes in Auto-Rotation. When off, use your selected enemy and your healing target priorities.");
+        changed |= ImGui.SliderFloat("Outline thickness", ref c.BorderWidth, 1, 8, "%.1f");
+        Tooltip("Set the width of the colored outline around suggested hotbar actions.");
+        changed |= Toggle("Pulse outlines", ref c.Pulse,
+            "Gently brighten and dim the hotbar outlines to make them easier to spot.");
         changed |= DrawChannel(c.Damage, false);
         changed |= DrawChannel(c.Healing, true);
-        if (ImGui.Button(L("Reset window positions", "Réinitialiser les positions")))
+        if (ImGui.Button("Reset window layout"))
         {
-            c.Damage.Position = null;
-            c.Healing.Position = null;
-            // Reopen windows so the next Appearing condition applies the defaults.
+            c.Damage.Position = c.Healing.Position = null;
+            c.Damage.WindowSize = c.Healing.WindowSize = null;
             P.TeachingWindowReset++;
             changed = true;
         }
-        changed |= ImGui.Checkbox(L("Share rotation settings with Wrath Combo", "Partager les réglages de rotation avec Wrath Combo"), ref c.ShareRotationSettings);
-        if (ImGui.IsItemHovered()) ImGui.SetTooltip(L("Applied when Enhanced is reloaded.", "Appliqué au rechargement d’Enhanced."));
+        Tooltip("Restore both windows to their starting positions and compact sizes.");
+        changed |= Toggle("Share rotation settings with Wrath Combo", ref c.ShareRotationSettings,
+            "Keep job and rotation settings shared when switching between the two plugins. Window preferences stay separate. Reload Enhanced after changing this option.");
         if (SharedConfiguration.Status.Length > 0 && c.ShareRotationSettings)
             ImGui.TextDisabled(SharedConfiguration.Status);
         if (changed) c.Save();
@@ -50,21 +63,34 @@ internal static class TeachingSettings
     {
         ImGui.PushID(healing ? "Healing" : "Damage");
         var changed = false;
-        if (ImGui.TreeNodeEx(L(healing ? "Healing" : "Damage", healing ? "Soins" : "Dégâts"), ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.TreeNodeEx(healing ? "Healing" : "Damage", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            changed |= ImGui.Checkbox(L("Highlight hotbar actions", "Surligner les sorts sur les barres"), ref c.Highlight);
-            changed |= ImGui.ColorEdit4(L("Color", "Couleur"), ref c.Color, ImGuiColorEditFlags.NoInputs);
-            changed |= ImGui.Checkbox(L("Show next action window", "Afficher la prochaine action"), ref c.ShowWindow);
-            changed |= ImGui.Combo(L("Rotation", "Rotation"), ref c.Rotation,
-                L("Automatic\0Single target\0Area of effect\0", "Automatique\0Monocible\0Zone\0"));
-            changed |= ImGui.Checkbox(L("Lock position", "Verrouiller la position"), ref c.Locked);
-            changed |= ImGui.Checkbox(L("Click through", "Laisser passer les clics"), ref c.ClickThrough);
-            changed |= ImGui.Checkbox(L("Click icon to use action", "Cliquer sur l’icône pour lancer l’action"), ref c.ClickToUse);
-            changed |= ImGui.Checkbox(L("Show action name", "Afficher le nom du sort"), ref c.ShowActionName);
-            changed |= ImGui.Checkbox(L("Show target name", "Afficher le nom de la cible"), ref c.ShowTarget);
-            changed |= ImGui.Checkbox(L("Show GCD bar", "Afficher la recharge globale"), ref c.ShowCooldown);
-            changed |= ImGui.SliderFloat(L("Icon size", "Taille de l’icône"), ref c.IconSize, 32, 160, "%.0f");
-            changed |= ImGui.SliderFloat(L("Background opacity", "Opacité du fond"), ref c.Opacity, 0, 1, "%.2f");
+            changed |= Toggle("Highlight hotbar actions", ref c.Highlight,
+                "Outline the next suggested action on your hotbars, including matching Wrath custom buttons.");
+            changed |= ImGui.ColorEdit4("Color", ref c.Color, ImGuiColorEditFlags.NoInputs);
+            Tooltip("Choose the color and transparency of this channel's outlines and window accents.");
+            changed |= Toggle("Show next action window", ref c.ShowWindow,
+                "Show this channel's next action in its own window. Hotbar highlights can stay on independently.");
+            changed |= ImGui.Combo("Rotation", ref c.Rotation, "Automatic\0Single target\0Area of effect\0");
+            Tooltip(healing
+                ? "Automatic chooses between your enabled single-target and group healing presets using Wrath's healing thresholds. The other choices restrict suggestions to one type."
+                : "Automatic chooses between your enabled single-target and area presets using Wrath's enemy-count threshold. The other choices restrict suggestions to one type.");
+            changed |= Toggle("Lock window", ref c.Locked,
+                "Keep this window in place and at its current size. Unlock it to drag the window or resize it from a corner.");
+            changed |= Toggle("Click through when locked", ref c.ClickThrough,
+                "While locked, let clicks pass through to the game. Unlocked windows remain interactive so you can move and resize them.");
+            changed |= Toggle("Click icon to use action", ref c.ClickToUse,
+                "Click the icon to use the displayed action on its suggested target. Each click requests one action. Click-through takes priority while locked.");
+            changed |= Toggle("Show action name", ref c.ShowActionName,
+                "Show the action name below its icon. Hover over a shortened name to read it in full.");
+            changed |= Toggle("Show target name", ref c.ShowTarget,
+                "Show the suggested target below the action. Green means yourself or your selected target; orange means another target. Click the name to select it.");
+            changed |= Toggle("Show GCD bar", ref c.ShowCooldown,
+                "Show the shared cooldown of your spells and weaponskills. A full bar means the next one can start.");
+            changed |= ImGui.SliderFloat("Icon size", ref c.IconSize, 24, 160, "%.0f");
+            Tooltip("Set the preferred icon size. It also shrinks to fit when you make the window smaller.");
+            changed |= ImGui.SliderFloat("Background opacity", ref c.Opacity, 0, 1, "%.2f");
+            Tooltip("Make the window background more transparent or more solid.");
             ImGui.TreePop();
         }
         ImGui.PopID();

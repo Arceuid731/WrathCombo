@@ -15,11 +15,11 @@ Install **Wrath Combo Enhanced**. Both editions can stay installed; enable only 
 ## Teaching mode
 
 1. Enable your job's damage and healing presets in PvE Features. Auto-action checkboxes are not required.
-2. Open **Settings → Teaching mode** (or **Réglages → Mode pédagogique**).
+2. Open **Settings → Teaching mode**. The teaching interface uses English, with simple tooltips for every setting.
 3. Customize the red damage and green healing highlights and the two action windows.
-4. Use **Preview windows** to place them, then lock their positions if desired.
+4. Use **Preview windows** to arrange them. Turn off **Lock window**, then drag a corner to resize. Each window saves its own position and size.
 
-Each window can show the action icon, action name, target name and GCD progress. Target names are green when already selected and orange when another target is suggested. Click a target name to select it. **Click icon to use action** is optional and off by default. Click-through disables all window interaction.
+Each window can show the action icon, action name, target name and GCD progress. Icons shrink to fit smaller windows; long names are shortened and available in full on hover. Target names are green when already selected and orange when another target is suggested. Click a target name to select it. **Click icon to use action** is optional and off by default. **Click through when locked** passes clicks to the game while locked; unlocked windows remain interactive for arranging the layout.
 
 Manual play is enabled by default. Use your normal hotbars, Wrath's custom one-button actions, or explicitly enable window clicks. Auto-Rotation is available after turning off Manual play.
 

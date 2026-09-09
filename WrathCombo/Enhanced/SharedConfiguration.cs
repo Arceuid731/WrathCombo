@@ -45,7 +45,7 @@ internal static class SharedConfiguration
             {
                 sharedContents = contents;
                 sharedLoaded = true;
-                Status = TeachingSettings.L("Shared with Wrath Combo", "Partagé avec Wrath Combo");
+                Status = "Shared with Wrath Combo";
             }
         }
         else config = new();
@@ -69,14 +69,14 @@ internal static class SharedConfiguration
         if (!EnhancedSettings.Current.ShareRotationSettings) return;
         if (OriginalLoaded)
         {
-            Status = TeachingSettings.L("Sharing paused: disable Wrath Combo, then reload Enhanced", "Partage en pause : désactivez Wrath Combo, puis rechargez Enhanced");
+            Status = "Sharing paused: disable Wrath Combo, then reload Enhanced";
             return;
         }
         // Refuse a stale overwrite, including another process changing the file.
         var current = File.Exists(SharedPath) ? File.ReadAllText(SharedPath) : null;
         if (current != sharedContents || (!sharedLoaded && current != null))
         {
-            Status = TeachingSettings.L("Wrath settings changed: reload Enhanced to share them", "Réglages Wrath modifiés : rechargez Enhanced pour les partager");
+            Status = "Wrath settings changed: reload Enhanced to share them";
             return;
         }
         var snapshot = Snapshot(config);
@@ -92,6 +92,6 @@ internal static class SharedConfiguration
         sharedContents = output;
         sharedLoaded = true;
         baseline = snapshot;
-        Status = TeachingSettings.L("Shared with Wrath Combo", "Partagé avec Wrath Combo");
+        Status = "Shared with Wrath Combo";
     }
 }
