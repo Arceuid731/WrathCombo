@@ -10,10 +10,10 @@ internal static class HotbarGlowFrame
     private const int FrameLeft = 480;
 
     // This frame includes the bloom around a 96px high-resolution action icon.
-    internal static (Vector2 Start, Vector2 End) Bounds(Vector2 start, Vector2 size, float inset)
+    internal static (Vector2 Start, Vector2 End) Bounds(Vector2 start, Vector2 size, float inset, float padding = 0)
     {
         var center = start + size / 2;
-        var half = (size - new Vector2(inset * 2)) * 0.75f;
+        var half = (size + new Vector2((padding - inset) * 2)) * 0.75f;
         return (center - half, center + half);
     }
 

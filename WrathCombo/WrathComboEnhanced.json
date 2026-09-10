@@ -7,6 +7,6 @@
   "Description": "Learn your rotation with red damage highlights, green healing highlights, and two movable next-action windows showing their targets. Includes Wrath Combo's one-button rotations. Open settings with /wce. Enable only one Wrath Combo edition at a time.",
   "RepoUrl": "https://github.com/Arceuid731/WrathCombo",
   "IconUrl": "https://raw.githubusercontent.com/Arceuid731/WrathCombo/main/res/plugin/wrathcombo.png",
-  "Changelog": "New soft glow highlights using the game's luminous action frame, with your damage and healing colors. Adjust Glow intensity or switch back to Outline in Teaching mode. Shared support actions are described in the channel tooltips.",
+  "Changelog": "Four independent guidance channels: damage and healing, each with single-target and AoE suggestions. AoE highlights use a double frame. Adjust Highlight padding (px) for more space around icons. Next-action windows are compact horizontal cards without titles, with a subtle color accent and an AoE badge. Existing colors and positions are preserved; window sizes adopt the compact layout once.",
   "Tags": ["combo", "wrath", "teaching", "healing", "rotation", "pve"]
 }

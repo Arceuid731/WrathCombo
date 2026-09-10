@@ -11,17 +11,16 @@ internal static class RecommendationRules
         return selected != null && valid(selected) ? selected : null;
     }
 
-    internal static bool AllowLane(int mode, bool area, bool healing, bool needsSingle,
-        bool needsArea, int enemies, int areaThreshold)
-    {
-        if ((mode == 1 && area) || (mode == 2 && !area)) return false;
-        if (healing) return area ? needsArea : needsSingle;
-        return !area || mode == 2 || enemies >= areaThreshold;
-    }
+    // Show both damage alternatives independently, as the custom buttons do.
+    // Healing still observes Wrath's single-target and group healing thresholds.
+    internal static bool AllowChannel(TeachingChannel channel, bool needsSingle, bool needsArea) =>
+        !channel.IsHealing() || (channel.IsArea() ? needsArea : needsSingle);
 
     internal static bool Fresh(uint recommendationJob, uint currentJob, long created, long now) =>
         recommendationJob == currentJob && now >= created && now - created < 500;
 
     internal static bool Matches(uint action, uint source, uint displayed, uint original, uint adjusted, bool replacing = true) =>
-        action != 0 && (displayed == action || original == action || adjusted == action || (replacing && original == source));
+        action != 0 && (original is >= 1_000_000 and <= 1_000_003
+            ? replacing && original == source
+            : displayed == action || original == action || adjusted == action || (replacing && original == source));
 }

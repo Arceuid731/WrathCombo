@@ -35,7 +35,9 @@ internal static class TeachingSettings
         changed |= Toggle("Use Wrath's rotation targeting", ref c.UseWrathTargeting,
             "Follow Auto-Rotation's target modes while it is enabled. Otherwise, use your selected enemy and normal healing target priorities. If Auto-Rotation finds no valid damage target, use your selected enemy.");
         changed |= ImGui.Combo("Highlight style", ref c.HighlightStyle, "Glow\0Outline\0");
-        Tooltip("Glow adds a soft, luminous frame. Outline draws a plain border. Both use your Damage and Healing colors.");
+        Tooltip("Glow adds a soft, luminous frame. Outline draws a plain border. AoE suggestions have an extra outer border in both styles.");
+        changed |= ImGui.SliderFloat("Highlight padding (px)", ref c.HighlightPadding, 0, 20, "%.0f px");
+        Tooltip("Move the highlight outward by this many pixels on each side, leaving more room to see the action icon. Applies to all four highlights.");
         if (c.HighlightStyle == 0)
         {
             changed |= ImGui.SliderFloat("Glow intensity", ref c.GlowIntensity, 0.2f, 2, "%.1f");
@@ -48,16 +50,16 @@ internal static class TeachingSettings
         }
         changed |= Toggle("Pulse highlights", ref c.Pulse,
             "Gently brighten and dim the highlights to make them easier to spot.");
-        changed |= DrawChannel(c.Damage, false);
-        changed |= DrawChannel(c.Healing, true);
+        foreach (var channel in TeachingChannels.All)
+            changed |= DrawChannel(c.Get(channel), channel);
         if (ImGui.Button("Reset window layout"))
         {
-            c.Damage.Position = c.Healing.Position = null;
-            c.Damage.WindowSize = c.Healing.WindowSize = null;
+            foreach (var channel in TeachingChannels.All)
+                c.Get(channel).Position = c.Get(channel).WindowSize = null;
             P.TeachingWindowReset++;
             changed = true;
         }
-        Tooltip("Restore both windows to their starting positions and compact sizes.");
+        Tooltip("Restore all four windows to their starting positions and compact sizes.");
         changed |= Toggle("Share rotation settings with Wrath Combo", ref c.ShareRotationSettings,
             "Keep job and rotation settings shared when switching between the two plugins. Window preferences stay separate. Reload Enhanced after changing this option.");
         if (SharedConfiguration.Status.Length > 0 && c.ShareRotationSettings)
@@ -67,24 +69,20 @@ internal static class TeachingSettings
         ImGui.Separator();
     }
 
-    private static bool DrawChannel(ChannelSettings c, bool healing)
+    private static bool DrawChannel(ChannelSettings c, TeachingChannel channel)
     {
-        ImGui.PushID(healing ? "Healing" : "Damage");
+        ImGui.PushID(channel.ToString());
         var changed = false;
-        if (ImGui.TreeNodeEx(healing ? "Healing" : "Damage", ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.TreeNodeEx(channel.Label(), ImGuiTreeNodeFlags.DefaultOpen))
         {
             changed |= Toggle("Highlight hotbar actions", ref c.Highlight,
-                healing
-                    ? "Highlight the next action from the healing rotation, including matching custom buttons. Shared support actions can also appear in Damage."
-                    : "Highlight the next action from the damage rotation, including matching custom buttons. Shared support actions can also appear in Healing.");
+                channel.IsArea()
+                    ? "Highlight this AoE rotation's next action with a double frame. Enable the job's matching AoE preset first. Healing suggestions follow Wrath's group healing thresholds."
+                    : "Highlight this single-target rotation's next action, including its custom button. Shared support actions can appear in more than one rotation.");
             changed |= ImGui.ColorEdit4("Color", ref c.Color, ImGuiColorEditFlags.NoInputs);
             Tooltip("Choose the color and transparency of this channel's highlights and window accents.");
             changed |= Toggle("Show next action window", ref c.ShowWindow,
                 "Show this channel's next action in its own window. Hotbar highlights can stay on independently.");
-            changed |= ImGui.Combo("Rotation", ref c.Rotation, "Automatic\0Single target\0Area of effect\0");
-            Tooltip(healing
-                ? "Automatic chooses between your enabled single-target and group healing presets using Wrath's healing thresholds. The other choices restrict suggestions to one type."
-                : "Automatic chooses between your enabled single-target and area presets using Wrath's enemy-count threshold. The other choices restrict suggestions to one type.");
             changed |= Toggle("Lock window", ref c.Locked,
                 "Keep this window in place and at its current size. Unlock it to drag the window or resize it from a corner.");
             changed |= Toggle("Click through when locked", ref c.ClickThrough,
@@ -92,7 +90,7 @@ internal static class TeachingSettings
             changed |= Toggle("Click icon to use action", ref c.ClickToUse,
                 "Click the icon to use the displayed action on its suggested target. Each click requests one action. Click-through takes priority while locked.");
             changed |= Toggle("Show action name", ref c.ShowActionName,
-                "Show the action name below its icon. Hover over a shortened name to read it in full.");
+                "Show the action name beside its icon. Hover over a shortened name to read it in full.");
             changed |= Toggle("Show target name", ref c.ShowTarget,
                 "Show the suggested target below the action. Green means yourself or your selected target; orange means another target. Click the name to select it.");
             changed |= Toggle("Show GCD bar", ref c.ShowCooldown,

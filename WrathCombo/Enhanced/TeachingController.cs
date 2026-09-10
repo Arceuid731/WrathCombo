@@ -20,14 +20,23 @@ using ActionRow = Lumina.Excel.Sheets.Action;
 namespace WrathCombo.Enhanced;
 
 internal sealed record Recommendation(uint ActionId, uint SourceAction, ulong TargetId,
-    string TargetName, uint JobId, bool Healing, bool Area, long CreatedAt);
+    string TargetName, uint JobId, bool Healing, bool Area, long CreatedAt)
+{
+    internal TeachingChannel Channel => TeachingChannels.From(Healing, Area);
+}
 
 internal sealed unsafe class TeachingController
 {
-    internal Recommendation? Damage { get; private set; }
-    internal Recommendation? Healing { get; private set; }
-    internal string DamageDiagnostic { get; private set; } = "Not evaluated";
-    internal string HealingDiagnostic { get; private set; } = "Not evaluated";
+    private readonly Recommendation?[] actions = new Recommendation?[4];
+    private readonly string[] diagnostics = ["Not evaluated", "Not evaluated", "Not evaluated", "Not evaluated"];
+    internal Recommendation? Get(TeachingChannel channel) => actions[(int)channel];
+    internal string Diagnostic(TeachingChannel channel) => diagnostics[(int)channel];
+
+    private void Clear(string reason)
+    {
+        Array.Clear(actions);
+        Array.Fill(diagnostics, reason);
+    }
     private long nextUpdate;
     private long nextErrorLog;
     private long nextDiagnosticLog;
@@ -42,27 +51,26 @@ internal sealed unsafe class TeachingController
     {
         if (!CanShow)
         {
-            Damage = Healing = null;
-            DamageDiagnostic = HealingDiagnostic = "Guidance paused or unavailable";
+            Clear("Guidance paused or unavailable");
             return;
         }
         var now = Environment.TickCount64;
         if (now < nextUpdate) return;
         nextUpdate = now + 80;
-        Damage = Healing = null;
+        Array.Clear(actions);
         try
         {
             cfg ??= new(Service.Configuration.RotationConfig);
             if (ActionReplacer.ClassLocked() || DisabledJobsPVE.Contains(Player.Job) ||
                 (Service.Configuration.PenaltyPause > 0 && PlayerHasActionPenalty(false)))
             {
-                DamageDiagnostic = HealingDiagnostic = "Job disabled, class locked, or action penalty active";
+                Clear("Job disabled, class locked, or action penalty active");
                 return;
             }
-            Damage = Select(false);
-            Healing = Select(true);
-            var diagnostic = $"damage: {(Damage == null ? DamageDiagnostic : "suggesting")}; " +
-                $"healing: {(Healing == null ? HealingDiagnostic : "suggesting")}";
+            foreach (var channel in TeachingChannels.All)
+                actions[(int)channel] = Select(channel);
+            var diagnostic = string.Join("; ", TeachingChannels.All.Select(channel =>
+                $"{channel.Label()}: {(Get(channel) == null ? Diagnostic(channel) : "suggesting")}"));
             if (diagnostic != lastDiagnostic && now >= nextDiagnosticLog)
             {
                 Svc.Log.Information($"Teaching mode: {diagnostic}");
@@ -72,7 +80,7 @@ internal sealed unsafe class TeachingController
         }
         catch (Exception ex)
         {
-            DamageDiagnostic = HealingDiagnostic = "Rotation evaluation failed; see Dalamud log";
+            Clear("Rotation evaluation failed; see Dalamud log");
             if (now >= nextErrorLog)
             {
                 Svc.Log.Error(ex, "Teaching mode could not evaluate the current rotation.");
@@ -81,18 +89,15 @@ internal sealed unsafe class TeachingController
         }
     }
 
-    internal Recommendation? Select(bool healing)
+    internal Recommendation? Select(TeachingChannel channel)
     {
         if (!CanShow) return null;
-        void Note(string reason)
-        {
-            if (healing) HealingDiagnostic = reason;
-            else DamageDiagnostic = reason;
-        }
+        void Note(string reason) => diagnostics[(int)channel] = reason;
+        var healing = channel.IsHealing();
+        var area = channel.IsArea();
         var settings = EnhancedSettings.Current;
         var autoRotationEnabled = cfg!.Enabled;
         var useRotationTargeting = settings.UseWrathTargeting && autoRotationEnabled;
-        var channel = healing ? settings.Healing : settings.Damage;
         if (healing && Player.Object?.Role != CombatRole.Healer &&
             !(Player.Job == Job.BLU && BLU.HasHealerMimicry))
         {
@@ -127,13 +132,11 @@ internal sealed unsafe class TeachingController
 
         var needsSingleHeal = healing && HealerTargeting.NeedsSingleTargetHeal(target);
         var needsAreaHeal = healing && HealerTargeting.CanAoEHeal();
-        // Urgent single-target healing comes first even when several allies are hurt.
-        var urgent = needsSingleHeal && GetTargetHPPercent(target) <= 35;
         var cleanseTarget = healing ? (HealRetargeting.RetargetSettingOn
             ? SimpleTarget.Stack.AllyToEsuna as IBattleChara
             : target) : null;
         var needsCleanse = healing && cleanseTarget?.HasCleansableDebuff == true;
-        if (healing && !needsSingleHeal && !needsAreaHeal && !needsCleanse)
+        if (!RecommendationRules.AllowChannel(channel, needsSingleHeal || needsCleanse, needsAreaHeal))
         {
             Note("No healing or cleansing needed at the configured thresholds");
             return null;
@@ -142,14 +145,12 @@ internal sealed unsafe class TeachingController
         var candidates = Service.ActionReplacer.CustomCombos
             .Select(combo => (Combo: combo, Data: combo.Preset.Attributes()))
             .Where(x => x.Data is { AutoAction: not null, ReplaceSkill: not null } &&
-                x.Data.AutoAction.IsHeal == healing && !x.Data.IsPvP &&
-                x.Data.JobInfo.Job == Player.Job.GetUpgradedJob() && IsEnabled(x.Combo.Preset))
-            .OrderBy(x => healing && urgent ? x.Data.AutoAction!.IsAoE : !x.Data.AutoAction!.IsAoE);
+                x.Data.AutoAction.IsHeal == healing && x.Data.AutoAction.IsAoE == area && !x.Data.IsPvP &&
+                x.Data.JobInfo.Job == Player.Job.GetUpgradedJob() && IsEnabled(x.Combo.Preset));
 
         Note("No enabled full rotation for this job and channel");
         foreach (var entry in candidates)
         {
-            var area = entry.Data.AutoAction!.IsAoE;
             var source = entry.Data.ReplaceSkill!.ActionIDs.FirstOrDefault();
             if (source == 0) continue;
             var evaluationTarget = healing && area ? Player.Object : target;
@@ -161,14 +162,6 @@ internal sealed unsafe class TeachingController
                 if (best != null && NumberOfEnemiesInRange(OriginalHook(source), best, true) >
                     NumberOfEnemiesInRange(OriginalHook(source), target, true)) evaluationTarget = best;
             }
-            var enemies = !healing && area ? NumberOfEnemiesInRange(OriginalHook(source), evaluationTarget, true) : 0;
-            if (!RecommendationRules.AllowLane(channel.Rotation, area, healing, needsSingleHeal || needsCleanse,
-                needsAreaHeal, enemies, cfg!.DPSSettings.DPSAoETargets ?? 3))
-            {
-                Note($"{entry.Combo.Preset}: excluded by channel mode or target-count threshold");
-                continue;
-            }
-
             using var context = new RecommendationContext(evaluationTarget, healing);
             var result = OriginalHook(AutoRotationHelper.InvokeCombo(entry.Combo.Preset, entry.Data, ref source, evaluationTarget));
             var detail = $"{entry.Combo.Preset}: source {source}, action {result}";
@@ -215,17 +208,17 @@ internal sealed unsafe class TeachingController
 
     internal void Click(Recommendation displayed, bool targetOnly)
     {
-        var healing = displayed.Healing;
         if (!CanShow) return;
-        var channel = healing ? EnhancedSettings.Current.Healing : EnhancedSettings.Current.Damage;
+        var channel = EnhancedSettings.Current.Get(displayed.Channel);
         if (channel.PassThrough || (!targetOnly && !channel.ClickToUse)) return;
         // Re-evaluate on the framework thread: never cast on a stale displayed target.
         Svc.Framework.RunOnFrameworkThread(() =>
         {
             if (!CanShow || channel.PassThrough || (!targetOnly && !channel.ClickToUse) ||
                 !IsFresh(displayed)) return;
-            var action = Select(healing);
-            if (action == null || action.ActionId != displayed.ActionId || action.TargetId != displayed.TargetId) return;
+            var action = Select(displayed.Channel);
+            if (action == null || action.ActionId != displayed.ActionId || action.SourceAction != displayed.SourceAction ||
+                action.TargetId != displayed.TargetId) return;
             var target = action.TargetId.GetObject();
             if (target == null || !target.IsTargetable) return;
             if (targetOnly)

@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Numerics;
 using WrathCombo.Enhanced;
 
 var passed = 0;
@@ -81,18 +82,56 @@ Check(RecommendationRules.DamageTarget(false, true, dead, tankTarget, ValidDamag
 Check(RecommendationRules.DamageTarget<TargetShape>(true, true, null, null, ValidDamageTarget) == null,
     "Guidance remains idle when neither target exists");
 
-Check(!RecommendationRules.AllowLane(0, true, false, false, false, 2, 3), "DPS area threshold respected");
-Check(RecommendationRules.AllowLane(0, true, false, false, false, 3, 3), "DPS area selected at threshold");
-Check(RecommendationRules.AllowLane(2, true, false, false, false, 1, 3), "Forced area mode respected");
-Check(!RecommendationRules.AllowLane(1, true, false, false, false, 5, 3), "Forced single-target excludes area");
-Check(!RecommendationRules.AllowLane(0, false, true, false, true, 0, 3), "Healthy single target does not cause heal spam");
-Check(RecommendationRules.AllowLane(0, true, true, false, true, 0, 3), "Group healing remains independent of single-target need");
+Check(RecommendationRules.AllowChannel(TeachingChannel.Damage, false, false) &&
+    RecommendationRules.AllowChannel(TeachingChannel.DamageArea, false, false), "Both damage alternatives remain visible independently of the AoE enemy-count threshold");
+Check(!RecommendationRules.AllowChannel(TeachingChannel.Healing, false, true), "Healthy single target does not cause heal spam");
+Check(RecommendationRules.AllowChannel(TeachingChannel.HealingArea, false, true), "Group healing remains independent of single-target need");
+Check(!RecommendationRules.AllowChannel(TeachingChannel.HealingArea, true, false), "Area healing respects group thresholds");
+Check(RecommendationRules.AllowChannel(TeachingChannel.Healing, true, false), "Single-target healing or cleansing stays independent of area healing");
 Check(RecommendationRules.Fresh(24, 24, 100, 599) && !RecommendationRules.Fresh(24, 24, 100, 600), "Stale recommendations expire");
 Check(!RecommendationRules.Fresh(24, 28, 100, 110), "Job changes invalidate recommendations");
 Check(RecommendationRules.Matches(119, 1000000, 1000000, 1000000, 1000000), "Custom DPS button highlighted");
 Check(RecommendationRules.Matches(119, 1000000, 119, 119, 119), "Native spell highlighted alongside custom button");
 Check(!RecommendationRules.Matches(119, 1000000, 120, 1000002, 120), "Healing button not highlighted as damage");
 Check(!RecommendationRules.Matches(119, 100, 100, 100, 100, false), "Teaching without replacements highlights only the suggested spell");
+for (uint source = 1_000_000; source <= 1_000_003; source++)
+    Check(Enumerable.Range(1_000_000, 4).All(button =>
+        RecommendationRules.Matches(3593, source, 3593, (uint)button, 3593) == (button == source)),
+        $"A shared Astral Draw recommendation highlights only its own custom channel {source}");
+
+var preferences = JsonConvert.DeserializeObject<TeachingPreferences>("""
+{"Damage":{"Color":{"X":0.8,"Y":0.2,"Z":0.1,"W":1},"Position":{"X":123,"Y":456},
+"WindowSize":{"X":250,"Y":180},"Locked":true,"ClickThrough":true,"IconSize":48},
+"Healing":{"ShowWindow":false},"Preview":true}
+""")!;
+preferences.Normalize();
+Check(preferences.Damage.Position == new Vector2(123, 456) && preferences.Damage.Locked && preferences.Damage.PassThrough,
+    "Compact migration preserves existing positions and interaction preferences");
+Check(preferences.Damage.WindowSize == null && preferences.LayoutVersion == 1, "Tall legacy window sizes migrate to compact defaults");
+Check(preferences.DamageArea!.Color == preferences.Damage.Color && preferences.DamageArea.Locked && !preferences.HealingArea!.ShowWindow,
+    "New AoE channels inherit the corresponding saved color and visibility");
+Check(preferences.DamageArea.Position == null && !preferences.Preview, "New windows get separate positions and preview does not persist");
+preferences.DamageArea.Color = Vector4.One;
+Check(preferences.Damage.Color != Vector4.One, "Editing an AoE color leaves the single-target color untouched");
+preferences.Damage.WindowSize = new(150, 55);
+preferences.DamageArea.WindowSize = new(180, 60);
+var roundTrip = JsonConvert.DeserializeObject<TeachingPreferences>(JsonConvert.SerializeObject(preferences))!;
+roundTrip.Normalize();
+Check(roundTrip.Damage.WindowSize == new Vector2(150, 55) && roundTrip.DamageArea!.WindowSize == new Vector2(180, 60),
+    "Each resized window survives reload without repeating the layout migration");
+Check(TeachingChannels.All.All(c => TeachingChannels.From(c.IsHealing(), c.IsArea()) == c), "All four channel identities round-trip");
+var compact = new ChannelSettings();
+var compactSize = ActionWindowLayout.Size(compact, ActionWindowLayout.TextHeight(compact, 17, 2));
+Check(compactSize.Y <= 55 && compactSize.X <= 160, "Default horizontal card stays compact with both text lines visible");
+compact.ShowActionName = compact.ShowTarget = compact.ShowCooldown = false;
+Check(ActionWindowLayout.Size(compact, 0) == new Vector2(56, 50), "Icon-only windows need no title or unused text space");
+foreach (var pixels in new[] { 48, 64, 96 })
+{
+    var oldBounds = HotbarGlowFrame.Bounds(new Vector2(100), new Vector2(pixels), 0);
+    var expanded = HotbarGlowFrame.Bounds(new Vector2(100), new Vector2(pixels), 0, 3);
+    Check(expanded.Start == oldBounds.Start - new Vector2(4.5f) && expanded.End == oldBounds.End + new Vector2(4.5f),
+        $"Pixel padding expands the native glow symmetrically at {pixels}px HUD size");
+}
 
 var testDir = Path.Combine(Path.GetTempPath(), "WrathEnhanced-tests-" + Guid.NewGuid());
 Directory.CreateDirectory(testDir);

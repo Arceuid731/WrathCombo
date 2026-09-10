@@ -224,8 +224,8 @@ public sealed partial class WrathCombo : IDalamudPlugin
         ws.AddWindow(_majorChangesWindow);
         ws.AddWindow(TargetHelper);
         Teaching = new Enhanced.TeachingController();
-        ws.AddWindow(new Enhanced.NextActionWindow(Teaching, false) { IsOpen = true });
-        ws.AddWindow(new Enhanced.NextActionWindow(Teaching, true) { IsOpen = true });
+        foreach (var channel in Enhanced.TeachingChannels.All)
+            ws.AddWindow(new Enhanced.NextActionWindow(Teaching, channel) { IsOpen = true });
 
         Configuration.ConfigChanged += DebugFile.LoggingConfigChanges;
 

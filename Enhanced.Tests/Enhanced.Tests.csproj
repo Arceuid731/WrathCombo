@@ -10,5 +10,9 @@
     <Compile Include="../WrathCombo/Enhanced/ConfigurationMerge.cs" Link="ConfigurationMerge.cs" />
     <Compile Include="../WrathCombo/Enhanced/AtomicJson.cs" Link="AtomicJson.cs" />
     <Compile Include="../WrathCombo/Enhanced/RecommendationRules.cs" Link="RecommendationRules.cs" />
+    <Compile Include="../WrathCombo/Enhanced/TeachingChannel.cs" Link="TeachingChannel.cs" />
+    <Compile Include="../WrathCombo/Enhanced/TeachingPreferences.cs" Link="TeachingPreferences.cs" />
+    <Compile Include="../WrathCombo/Enhanced/HotbarGlowFrame.cs" Link="HotbarGlowFrame.cs" />
+    <Compile Include="../WrathCombo/Enhanced/ActionWindowLayout.cs" Link="ActionWindowLayout.cs" />
   </ItemGroup>
 </Project>

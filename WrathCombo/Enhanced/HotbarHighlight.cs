@@ -23,11 +23,12 @@ internal static unsafe class HotbarHighlight
     internal static void Draw()
     {
         if (!TeachingController.CanShow || P?.Teaching == null) return;
-        var damage = P.Teaching.Damage;
-        var healing = P.Teaching.Healing;
         var c = EnhancedSettings.Current;
-        if ((!c.Damage.Highlight || !TeachingController.IsFresh(damage)) &&
-            (!c.Healing.Highlight || !TeachingController.IsFresh(healing))) return;
+        Span<bool> active = stackalloc bool[4];
+        var any = false;
+        foreach (var channel in TeachingChannels.All)
+            any |= active[(int)channel] = c.Get(channel).Highlight && TeachingController.IsFresh(P.Teaching.Get(channel));
+        if (!any) return;
         var hotbars = RaptureHotbarModule.Instance();
         if (hotbars == null) return;
         for (var index = 0; index < Bars.Length; index++)
@@ -53,9 +54,11 @@ internal static unsafe class HotbarHighlight
                 if (hot.CommandType != RaptureHotbarModule.HotbarSlotType.Action || slot.Icon == null) continue;
                 var node = &slot.Icon->AtkResNode;
                 if (!Visible(node)) continue;
-                var showDamage = c.Damage.Highlight && Matches(damage, (uint)slot.ActionId, hot.CommandId);
-                var showHeal = c.Healing.Highlight && Matches(healing, (uint)slot.ActionId, hot.CommandId);
-                if (!showDamage && !showHeal) continue;
+                var matches = 0;
+                foreach (var channel in TeachingChannels.All)
+                    if (active[(int)channel] && Matches(P.Teaching.Get(channel), (uint)slot.ActionId, hot.CommandId))
+                        matches |= 1 << (int)channel;
+                if (matches == 0) continue;
                 // Screen coordinates already include addon/parent translations. Multiply
                 // dimensions by the node ancestry scale, including HUD scale.
                 var scale = Vector2.One;
@@ -64,9 +67,19 @@ internal static unsafe class HotbarHighlight
                 var start = new Vector2(node->ScreenX, node->ScreenY) + ImGui.GetMainViewport().Pos;
                 var size = new Vector2(node->Width, node->Height) * scale;
                 if (size.X <= 0 || size.Y <= 0) continue;
-                if (showDamage) Highlight(start, size, c.Damage.Color, 0);
-                if (showHeal) Highlight(start, size, c.Healing.Color,
-                    showDamage ? Math.Min(size.X, size.Y) * 0.12f : 0);
+                var offset = 0f;
+                for (var role = 0; role < 4; role += 2)
+                {
+                    var single = (matches & (1 << role)) != 0;
+                    var area = (matches & (1 << (role + 1))) != 0;
+                    if (!single && !area) continue;
+                    var padding = c.HighlightPadding + offset;
+                    Highlight(start, size, c.Get((TeachingChannel)(single ? role : role + 1)).Color, padding);
+                    if (area) AreaBorder(start, size, c.Get((TeachingChannel)(role + 1)).Color, padding);
+                    // A shared spell uses one glow per role, plus its AoE marker. Place
+                    // a second role outside the first without covering the icon's center.
+                    offset += area ? 8 : 4;
+                }
             }
         }
     }
@@ -86,14 +99,14 @@ internal static unsafe class HotbarHighlight
         return true;
     }
 
-    private static void Highlight(Vector2 start, Vector2 size, Vector4 color, float inset)
+    private static void Highlight(Vector2 start, Vector2 size, Vector4 color, float padding)
     {
         var c = EnhancedSettings.Current;
         if (c.Pulse) color.W *= 0.7f + 0.3f * (float)(0.5 + 0.5 * Math.Sin(ImGui.GetTime() * 5));
         var draw = ImGui.GetForegroundDrawList();
         if (c.HighlightStyle == 0 && GetGlowTexture() is { } texture)
         {
-            var bounds = HotbarGlowFrame.Bounds(start, size, inset);
+            var bounds = HotbarGlowFrame.Bounds(start, size, 0, padding);
             var tint = color;
             tint.W *= Math.Min(c.GlowIntensity, 1);
             draw.AddImage(texture.Handle, bounds.Start, bounds.End, Vector2.Zero, Vector2.One,
@@ -105,15 +118,26 @@ internal static unsafe class HotbarHighlight
                 draw.AddImage(texture.Handle, bounds.Start, bounds.End, Vector2.Zero, Vector2.One,
                     ImGui.ColorConvertFloat4ToU32(tint));
             }
-            return;
         }
+        else
+        {
+            var glow = color;
+            glow.W *= 0.25f;
+            draw.AddRect(start - new Vector2(padding), start + size + new Vector2(padding),
+                ImGui.ColorConvertFloat4ToU32(glow), 5, ImDrawFlags.None, c.BorderWidth + 4);
+            draw.AddRect(start - new Vector2(padding), start + size + new Vector2(padding),
+                ImGui.ColorConvertFloat4ToU32(color), 5, ImDrawFlags.None, c.BorderWidth);
+        }
+    }
 
-        var end = start + size - new Vector2(inset);
-        start += new Vector2(inset);
-        var glow = color;
-        glow.W *= 0.25f;
-        draw.AddRect(start, end, ImGui.ColorConvertFloat4ToU32(glow), 5, ImDrawFlags.None, c.BorderWidth + 4);
-        draw.AddRect(start, end, ImGui.ColorConvertFloat4ToU32(color), 5, ImDrawFlags.None, c.BorderWidth);
+    private static void AreaBorder(Vector2 start, Vector2 size, Vector4 color, float padding)
+    {
+        var c = EnhancedSettings.Current;
+        // A crisp second frame distinguishes AoE even with pulse disabled.
+        var outer = new Vector2(padding + 5 + (c.HighlightStyle == 1 ? c.BorderWidth / 2 : 0));
+        color.W *= 0.85f;
+        ImGui.GetForegroundDrawList().AddRect(start - outer, start + size + outer,
+            ImGui.ColorConvertFloat4ToU32(color), 8, ImDrawFlags.None, 1.5f);
     }
 
     private static IDalamudTextureWrap? GetGlowTexture()

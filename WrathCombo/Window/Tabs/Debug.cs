@@ -108,8 +108,8 @@ internal class Debug : ConfigWindow, IDisposable
         ImGui.Text("This is where you can figure out where it all went wrong.");
         if (P.Teaching is { } teaching && ImGui.CollapsingHeader("Teaching mode diagnostics"))
         {
-            ImGui.TextWrapped($"Damage: {teaching.DamageDiagnostic}");
-            ImGui.TextWrapped($"Healing: {teaching.HealingDiagnostic}");
+            foreach (var channel in global::WrathCombo.Enhanced.TeachingChannels.All)
+                ImGui.TextWrapped($"{channel}: {teaching.Diagnostic(channel)}");
         }
         if (PingPluginIPC.CanGetPing)
             ImGui.Text($"Current Ping: {PingPluginIPC.LastPing}ms");
