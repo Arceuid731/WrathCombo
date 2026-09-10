@@ -1,4 +1,4 @@
-Wrath Combo Enhanced 1.0.0.4
+Wrath Combo Enhanced 1.0.0.5
 
 - Four independent guidance channels: Damage and Healing, each with Single target and AoE suggestions. Enable the corresponding job presets to use them.
 - AoE highlights have a second outer frame, retaining your damage and healing colors. Shared spells avoid duplicate glows, and custom buttons only highlight for their own channel.
