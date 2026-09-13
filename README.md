@@ -2,6 +2,8 @@
 
 A personal fork of [Wrath Combo](https://github.com/PunishXIV/WrathCombo), with separate damage and healing guidance inspired by Rotation Solver Reborn's teaching mode.
 
+Enhanced 1.0.0.6 includes upstream 1.0.4.24 (`28ae16cc3`). See [the integration notes](docs/upstream-1.0.4.24.md) for changes and validation.
+
 ## Install
 
 Add this custom repository in Dalamud Settings → Experimental → Custom Plugin Repositories:

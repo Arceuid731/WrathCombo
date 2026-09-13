@@ -14,5 +14,9 @@
     <Compile Include="../WrathCombo/Enhanced/TeachingPreferences.cs" Link="TeachingPreferences.cs" />
     <Compile Include="../WrathCombo/Enhanced/HotbarGlowFrame.cs" Link="HotbarGlowFrame.cs" />
     <Compile Include="../WrathCombo/Enhanced/ActionWindowLayout.cs" Link="ActionWindowLayout.cs" />
+    <Compile Include="../WrathCombo/Enhanced/RecommendationContext.cs" Link="RecommendationContext.cs" />
+    <Compile Include="../WrathCombo/Services/IPC/UpcomingPositionalHintService.cs" Link="UpcomingPositionalHintService.cs" />
+    <Compile Include="../WrathCombo.API/PositionalHintSnapshot.cs" Link="PositionalHintSnapshot.cs" />
+    <Compile Include="../WrathCombo.API/Enum/PositionalDirection.cs" Link="PositionalDirection.cs" />
   </ItemGroup>
 </Project>

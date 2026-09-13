@@ -6,6 +6,7 @@
 - The existing local Wrath configuration can be read by passing its path to the test executable. This check never writes to that file.
 - A Release build compiles all job presets against Dalamud API 15.
 - Package validation verifies the assembly/manifest identity and version, required dependencies, licenses and localized assemblies. It rejects the original plugin DLL/manifest and configuration backups.
+- Positional IPC regression checks run the production hint service and recommendation context with detached game/IPC doubles. Temporary teaching targets cannot publish, refresh or clear live hints; live notifications resume after nested evaluation. The test reproduces the failure with the unmodified upstream service.
 
 ## In-game acceptance (pending)
 
@@ -20,6 +21,7 @@ These require a running game with the plugin loaded; compilation cannot verify n
 7. Confirm overlays clear on death, zoning, logout, mount, cutscenes and PvP. Disable/re-enable Enhanced repeatedly and check no duplicate callbacks or DTR entries remain and that the glow texture is recreated correctly.
 8. Enable both Dancer damage presets and both custom damage buttons on one dummy: both suggestions should appear, with an AoE badge and double frame only for AoE. Repeat with four healer custom buttons, including Astral Draw appearing in multiple rotations. Each custom button must use its own channel's highlight settings; each window click must re-evaluate the same channel. Disabling an AoE preset must clear only the corresponding guidance.
 9. Upgrade from a two-window configuration: verify colors, position, click behavior and visibility survive. Check the one-time switch to compact dimensions, then resize all four windows, reload and confirm those sizes persist. Check icon-only, one-line and two-line cards at normal and enlarged UI scales.
+10. With a positional IPC consumer and a melee single-target preset enabled, compare teaching on/off while its rotation targeting selects a different enemy. The consumer must follow the live rotation target. Check nested/area guidance does not clear or redirect its hint. Test the revised opener countdown blocking, cancellation and restart, especially DNC; check BST simple-mode guidance with its preset enabled and SGE Druochole targeting from a damage rotation.
 
 ## Design boundaries
 

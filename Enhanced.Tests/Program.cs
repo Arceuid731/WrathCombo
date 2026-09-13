@@ -159,6 +159,7 @@ if (args.Length == 1)
     Check(ConfigShape.CustomInts.Count > 0, "Existing Wrath configuration imports job options");
     Check(bytesBefore.SequenceEqual(File.ReadAllBytes(args[0])), "Existing configuration left untouched by validation");
 }
+PositionalHintTests.Run(Check);
 Console.WriteLine($"{passed} tests passed.");
 
 internal sealed class ConfigShape
