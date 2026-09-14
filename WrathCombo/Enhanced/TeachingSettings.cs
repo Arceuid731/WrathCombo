@@ -26,6 +26,8 @@ internal static class TeachingSettings
         var c = EnhancedSettings.Current;
         bool changed = Toggle("Show rotation guidance", ref c.Enabled,
             "Show the next actions from your enabled job presets, in the windows and on your hotbars.");
+        changed |= Toggle("Keep game windows on top", ref c.GameUiOnTop,
+            "Keep game tooltips and windows above guidance panels and hotbar highlights.");
         changed |= Toggle("In combat only", ref c.CombatOnly,
             "Hide guidance outside combat. When off, damage suggestions still need a valid enemy target.");
         changed |= Toggle("Hide windows when no action is suggested", ref c.HideWhenIdle,

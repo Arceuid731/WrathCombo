@@ -31,6 +31,9 @@ internal static unsafe class HotbarHighlight
         if (!any) return;
         var hotbars = RaptureHotbarModule.Instance();
         if (hotbars == null) return;
+        var overlayDraw = ImGui.GetForegroundDrawList();
+        overlayDraw.AddDrawCmd();
+        var firstCommand = overlayDraw.CmdBuffer.Size - 1;
         for (var index = 0; index < Bars.Length; index++)
         {
             var address = Svc.GameGui.GetAddonByName(Bars[index]);
@@ -82,6 +85,8 @@ internal static unsafe class HotbarHighlight
                 }
             }
         }
+        overlayDraw.AddDrawCmd();
+        GameUiOcclusion.Clip(overlayDraw, firstCommand);
     }
 
     private static bool Matches(Recommendation? action, uint displayed, uint original)

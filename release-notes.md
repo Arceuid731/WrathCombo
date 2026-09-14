@@ -1,13 +1,8 @@
-Wrath Combo Enhanced 1.0.0.6
+Wrath Combo Enhanced 1.0.0.7
 
-- Updated to upstream Wrath Combo 1.0.4.24, including Beastmaster rotations and helpers, revised openers, Blue Mage Primal Combo options and Occult Crescent refresh settings.
-- Updated melee positional IPC for SAM, DRG, MNK, NIN, RPR and VPR. Compatible overlays can consume the upcoming rear/flank hints.
-- Integrated Dark Knight mana reservation fixes before The Blackest Night is learned, Sage Druochole targeting changes and the Viper FRU opener.
-- Preserved all four teaching windows, glow highlights, saved layouts, click controls and shared rotation settings.
-- Fixed an integration issue where teaching evaluations could replace or clear positional hints with a temporary recommendation target.
+- Game tooltips, popup menus and framed game windows now take priority over the four guidance panels and hotbar highlights. Only the covered portions are hidden.
+- Added "Keep game windows on top", enabled by default. Covered guidance panels also stop intercepting the mouse over native game windows.
+- Merged all five upstream commits through 41f53f6b5, including Wrath Combo 1.0.4.25, the opener skip timeout, Beastmaster IPC updates and the queued Cease/custom-action fix.
+- Preserved Enhanced guidance, glow and AoE highlights, saved positions, click controls and shared rotation settings.
 
-New opener prepull-block settings default to enabled. Suggestions can wait for a countdown before advancing; check your job's opener settings if its out-of-combat behavior changes.
-
-Validation: 62 local checks passed, including 3 read-only checks against an existing Wrath configuration and 6 new positional integration checks. Release compilation and Enhanced package validation passed. In-game combat, native UI and positional-consumer checks remain pending.
-
-Update through the existing Dalamud repository. Full changes and validation details: docs/upstream-1.0.4.24.md.
+Validation: Enhanced checks, Release compilation, package identity validation and isolated native ImGui clipping tests. The clipping tests cover overlapping windows, complete and partial occlusion, index/texture preservation and foreground drawings from other plugins. Native addon bounds and mouse interaction still need confirmation in the game client.

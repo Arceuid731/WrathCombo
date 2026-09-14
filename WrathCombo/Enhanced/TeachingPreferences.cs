@@ -7,6 +7,7 @@ namespace WrathCombo.Enhanced;
 internal class TeachingPreferences
 {
     public bool Enabled = true;
+    public bool GameUiOnTop = true;
     public bool ShareRotationSettings = true;
     public bool CombatOnly;
     public bool HideWhenIdle = true;

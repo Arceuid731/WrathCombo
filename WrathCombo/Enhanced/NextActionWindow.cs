@@ -32,7 +32,7 @@ internal sealed class NextActionWindow(TeachingController controller, TeachingCh
         Flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings |
                 ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoScrollbar;
         if (Settings.Locked) Flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
-        if (Settings.PassThrough) Flags |= ImGuiWindowFlags.NoInputs;
+        if (Settings.PassThrough || GameUiOcclusion.CoversMouse()) Flags |= ImGuiWindowFlags.NoInputs;
         var scale = ImGuiHelpers.GlobalScale;
         ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.025f, 0.03f, 0.04f, Settings.Opacity));
         ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(1, 1, 1, 0.12f * Settings.Opacity));
@@ -140,6 +140,8 @@ internal sealed class NextActionWindow(TeachingController controller, TeachingCh
                 ImGui.GetColorU32(new Vector4(1, 1, 1, 0.1f)), scale);
             draw.AddRectFilled(barStart, barStart + new Vector2(available.X * progress, 2 * scale), accent, scale);
         }
+
+        GameUiOcclusion.Clip(ImGui.GetWindowDrawList());
 
         if (!Settings.Locked)
         {

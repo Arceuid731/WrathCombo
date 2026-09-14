@@ -35,6 +35,8 @@ jobs:
           Expand-Archive Dalamud.zip -DestinationPath $destination -Force
       - name: Test configuration sharing and recommendations
         run: dotnet run --project Enhanced.Tests/Enhanced.Tests.csproj -c Release
+      - name: Test native UI clipping
+        run: dotnet run --project Enhanced.UiTests -c Release
       - name: Build plugin
         shell: pwsh
         run: |
