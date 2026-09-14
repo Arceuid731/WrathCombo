@@ -274,6 +274,8 @@ public sealed partial class WrathCombo : IDalamudPlugin
         Svc.Framework.RunOnTick(ActionRetargeting.ClearOldRetargets,
             TimeSpan.FromSeconds(60));
 
+        Svc.Data.GameData.Options.PanicOnSheetChecksumMismatch = false; //Remove this once schema is stable
+
 #if DEBUG
         VfxManager.Logging = true;
         ConfigWindow.IsOpen = true;
