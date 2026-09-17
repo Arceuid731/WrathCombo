@@ -1,8 +1,7 @@
-Wrath Combo Enhanced 1.0.0.7
+Wrath Combo Enhanced 1.0.0.8
 
-- Game tooltips, popup menus and framed game windows now take priority over the four guidance panels and hotbar highlights. Only the covered portions are hidden.
-- Added "Keep game windows on top", enabled by default. Covered guidance panels also stop intercepting the mouse over native game windows.
-- Merged all five upstream commits through 41f53f6b5, including Wrath Combo 1.0.4.25, the opener skip timeout, Beastmaster IPC updates and the queued Cease/custom-action fix.
-- Preserved Enhanced guidance, glow and AoE highlights, saved positions, click controls and shared rotation settings.
+- Fixed AST advanced AoE custom-button targeting for cards, Earthly Star and Combust.
+- Prevented overlapping Beastmaster battlehorn requests while a horn was just used or the player is casting.
+- Integrated upstream through a607681a7 while preserving Enhanced guidance, four channels, native-window clipping and shared settings.
 
-Validation: Enhanced checks, Release compilation, package identity validation and isolated native ImGui clipping tests. The clipping tests cover overlapping windows, complete and partial occlusion, index/texture preservation and foreground drawings from other plugins. Native addon bounds and mouse interaction still need confirmation in the game client.
+Validation: Enhanced regression checks, native UI clipping tests, Release compilation and package validation. Combat behavior still requires confirmation in game.
