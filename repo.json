@@ -3,7 +3,7 @@
     "Author": "Arceuid731 / Team Wrath",
     "Name": "Wrath Combo Enhanced",
     "InternalName": "WrathComboEnhanced",
-    "AssemblyVersion": "1.0.0.8",
+    "AssemblyVersion": "1.0.0.9",
     "Description": "Learn your rotation with red damage highlights, green healing highlights, and four compact next-action windows for single-target and AoE rotations. Each window shows its suggested target and can be moved or resized. Includes Wrath Combo's one-button rotations. Open settings with /wce. Enable only one Wrath Combo edition at a time.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Arceuid731/WrathCombo",
@@ -24,9 +24,9 @@
     "Punchline": "Wrath rotations with separate damage and healing guidance.",
     "Changelog": "Four independent guidance channels: damage and healing, each with single-target and AoE suggestions. AoE highlights use a double frame. Adjust Highlight padding (px) for more space around icons. Next-action windows are compact horizontal cards without titles, with a subtle color accent and an AoE badge. Existing colors and positions are preserved; window sizes adopt the compact layout once.",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.8/WrathComboEnhanced.zip",
-    "DownloadLinkUpdate": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.8/WrathComboEnhanced.zip",
-    "DownloadLinkTesting": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.8/WrathComboEnhanced.zip",
-    "LastUpdate": 1789668610
+    "DownloadLinkInstall": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.9/WrathComboEnhanced.zip",
+    "DownloadLinkUpdate": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.9/WrathComboEnhanced.zip",
+    "DownloadLinkTesting": "https://github.com/Arceuid731/WrathCombo/releases/download/enhanced-v1.0.0.9/WrathComboEnhanced.zip",
+    "LastUpdate": 1789747412
   }
 ]
